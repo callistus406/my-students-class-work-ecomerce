@@ -1,5 +1,5 @@
+
 import mongoose, { Schema, Types } from "mongoose";
-import { timeStamp } from "node:console";
 
 const customerSchema = new Schema({
 userId:{
@@ -22,13 +22,12 @@ phone:{
     type:String
 },
 addresses:{
-_Id:{type:Types.ObjectId},
 label:{type:String},
 street:{type:String, require:true},
 city:{type:String, require:true},
 state:{type:String, require:true},
 country:{type:String, require:true},
-postalCode:{type:String,},
+postalCode:{type:String},
 phone:{type:String},
 isDefault:{type:Boolean},
 },

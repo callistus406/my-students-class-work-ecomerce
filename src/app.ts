@@ -3,7 +3,7 @@ dotenv.config();
 import express from "express";
 import router from "./router/app.routers";
 import { logger } from "./midddleware/logger";
-import { mongoConnection } from "./config/app.config";
+import { mongoConnection } from "./config/db.connections";
 
 
 const app = express()
