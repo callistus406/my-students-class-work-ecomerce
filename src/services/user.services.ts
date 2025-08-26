@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken"
 import { IPreRegister, IRegister } from "../@types/user";
 import { preRegisterSchema } from "../validation/user-schema";
 import { newError } from "../midddleware/errorHandler.midleware";
-import { UserRepository } from "../repository/User.repository";
+import { UserRepository } from "../repository/user.repository";
 
 const jwtSecret = process.env.JWT_ADMIN_KEY as string
 

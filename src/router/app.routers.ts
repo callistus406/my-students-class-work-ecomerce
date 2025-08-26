@@ -1,7 +1,7 @@
 import express from "express";
 
 import { authMiddleware } from "../midddleware/auth.middleware";
-import { UserController } from "../controller/User.controller";
+import { UserController } from "../controller/user.controller";
 
 
 
