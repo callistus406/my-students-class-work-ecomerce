@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import {UserService} from "../services/user.services";
 import { IUsers } from "../interface/user.interface"
+import { UserService } from "../services/user.services";
+
 
 
 
