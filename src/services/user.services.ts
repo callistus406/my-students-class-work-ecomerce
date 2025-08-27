@@ -1,61 +1,50 @@
 import { Types } from "mongoose";
-
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
-import { IPreRegister, IRegister } from "../@types/user";
-import { preRegisterSchema } from "../validation/user-schema";
-import { newError } from "../midddleware/errorHandler.midleware";
 import { UserRepository } from "../repository/user.repository";
-
-const jwtSecret = process.env.JWT_ADMIN_KEY as string
+import {userSchema} from "../validation/user.validate"
+import { IUsers } from "../interface/user.interface";
 
 export class UserService {
-    static getUser = async ()  => {
+
+    static Register = async (user: IUsers) => {
+        if(!user){
+            throw new Error("Invalid user data");
+        }
+
+        
+        const { error } = userSchema.validate(user);
+        if (error) {
+            console.error("Validation error:", error.message);
+            throw new Error("Invalid input: " + error.message);
+        }
+
+
+  const isFound = await UserRepository.findUserByEmail(user.email);
+  if (isFound) {
+    throw new Error("Email already exists");
+  }
+
+  const hashedPassword = await bcrypt.hash(user.password, 10);
+  if (!hashedPassword) {
+    throw new Error("Password hashing failed");
+  }
+
+  const response = await UserRepository.register({
+    ...user,
+    password: hashedPassword,
+  });
+
+  if (!response) {
+    throw new Error("User registration failed");
+  }
+
+  return response;
+};
+
+
+      static getUser = async ()  => {
         return await UserRepository.getUsers();
-    };
-
-    static preRegister = async(user:IPreRegister) => {
-        const {error} = preRegisterSchema.validate(user)
-        if(error){
-         throw newError(error.message, 422)
-        }
-
-        const isExist = await UserRepository.fetchUserByEmail(user.email)
-        if(isExist){
-            throw newError("Login qith your regustered Email", 420)
-        }
-
-
-    };
-
-    static register = async (user:IRegister) => {
-        if(!user.firstName || !user.lastName || !user.email || !user.password) {
-            throw new Error("All fields are required")
-        }
-        if(!user.email.includes("@")){
-            throw new Error("inavlid email address")
-        }
-        if(user.password.length <3){
-            throw new Error("Password cannot be less than three")
-        }
-        if(!/[!#$%<>&*()-+=?"@]/.test(user.password)){
-            throw new Error("password must contain a symbol")
-        }
-        try {
-             const isEmail = await UserRepository.fetchUserByEmail(user.email)
-        if(isEmail){
-            throw new Error("Email already exsit")
-        }
-        const hashedPassword = await  bcrypt.hash(user.password, 10)
-        const newUser = {...user, password:hashedPassword}
-        const response= await UserRepository.register(newUser)
-        return response
-        } catch (error:any) {
-            throw new Error(error.message)
-            
-        }
-       
-    
     };
 
     static fetchUser = async (id: string) => {
@@ -74,7 +63,7 @@ export class UserService {
         if(!email.includes("@")){
             throw new Error("Invalid email address")
         }
-        const response = await UserRepository.fetchUserByEmail(email)
+        const response = await UserRepository.findUserByEmail(email)
         if(!response){
             throw new Error("user not found")
         }
@@ -112,35 +101,35 @@ export class UserService {
         return response;
     };
 
-    static login = async (email:string, password:string) => {
-        if(!email || !password){
-            throw new Error("Fields cannot be empty")
-        }
-        if (!email.includes("@")){
-            throw new Error("Invalid Email")
-        }
+    // static login = async (email:string, password:string) => {
+    //     if(!email || !password){
+    //         throw new Error("Fields cannot be empty")
+    //     }
+    //     if (!email.includes("@")){
+    //         throw new Error("Invalid Email")
+    //     }
         
-        const user = await UserRepository.fetchUserByEmail(email)
+    //     const user = await UserRepository.findUserByEmail(email)
         
-        if(!user){
-            throw new Error("user does not exist")
-        }
+    //     if(!user){
+    //         throw new Error("user does not exist")
+    //     }
 
-        const isValid = await bcrypt.compare(password, user.password)
-        if(!isValid){
-            throw new Error("Invalid username/password")
-        }
-        const payload = {
-            username: user.username,
-            email:user.email,
-        }
-        let jwtKey =  jwt.sign(payload, jwtSecret, {expiresIn:"1m"})
-        return {
-            message:"Successfully Loggedin",
-            authKey:jwtKey,
-        }
+    //     const isValid = await bcrypt.compare(password, user.password)
+    //     if(!isValid){
+    //         throw new Error("Invalid username/password")
+    //     }
+    //     const payload = {
+    //         username: user.username,
+    //         email:user.email,
+    //     }
+    //     let jwtKey =  jwt.sign(payload, jwtSecret, {expiresIn:"1m"})
+    //     return {
+    //         message:"Successfully Loggedin",
+    //         authKey:jwtKey,
+    //     }
     
-    }
+    // }
 
     
 }

@@ -1,37 +1,23 @@
 import { Types } from "mongoose";
 // import { dbUsers } from "../db/app.database";
-import { userModel } from "../models/user.model";
-import { response } from "express";
-
-
-export interface IUsers {
-    firstName: string,
-    lastName: string
-    email: string,
-    phone: string,
-    password: string,
-    country: string
-    company: string,
-}
-
+import {userModel} from "../models/user.model"
+import { IUsers } from "../interface/user.interface";
 
 
 export class UserRepository {
-    static getUsers = async () => {
+
+    static register = async (user: IUsers) => {
+          const response =await userModel.create(user)
+          if(!response) return null
+        return response
+    };
+
+      static getUsers = async () => {
         const users = await userModel.find()
         return users
     };
 
-    static register = async (user: IUsers) => {
-       
-          const response =await userModel.create(user)
-          if(!response) return null
-        return response       
-       
-      
-    };
-
-    static fetchUserByEmail = async (email:string):Promise<any> => {
+    static findUserByEmail = async (email:string):Promise<any> => {
         const response = await userModel.findOne({email})
         return response;
     }
