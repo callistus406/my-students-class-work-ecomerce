@@ -22,14 +22,20 @@ export class UserController {
     }
 
 
-    // static getUser = async (req:Request, res:Response) => {
-    //     const response = await UserService.getUser()
-    // res.status(200).json({
-    //     message:"Success",
-    //     data:response
-
-    // })
-    // };
+    static getUser = async (req:Request, res:Response) => {
+        try {
+            const response = await UserService.getUser()
+            res.status(200).json({
+                message:"Success",
+                data:response
+            })
+        } catch (error:any) {
+            res.status(400).json({
+                message:"Bad Request",
+                data:error.message
+            })
+        }
+    }
 
     // static Registration = async (req:Request, res:Response) => {
         
@@ -70,7 +76,7 @@ export class UserController {
 
             
     //     }
-    // };
+    //  };
 
     // static fetchByEmail = async (req:Request, res:Response) => {
     //     try {
@@ -132,21 +138,21 @@ export class UserController {
     //     }
     // };
 
-    // static login = async (req:Request,res:Response ) =>{
-    //     req.body.email = req.body.email.toLowerCase();
-    //     try {
-    //          const {email, password} = req.body
-    //          const response = await UserService.login(email, password)
-    //         res.status(200).json(response)
-    //     } catch (error:any) {
-    //         res.status(400).json({
-    //             message:"Bad Request",
-    //             data:error.message
-    //         })
+    static login = async (req:Request,res:Response ) =>{
+        req.body.email = req.body.email.toLowerCase();
+        try {
+             const {email, password} = req.body
+             const response = await UserService.login(email, password)
+            res.status(200).json(response)
+        } catch (error:any) {
+            res.status(400).json({
+                message:"Bad Request",
+                data:error.message
+            })
 
 
             
-    //     }
+        }
        
-    // }
+    }
 }

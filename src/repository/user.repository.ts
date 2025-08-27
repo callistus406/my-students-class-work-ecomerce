@@ -22,31 +22,31 @@ export class UserRepository {
         return response;
     }
 
-    static fetchUser = async (id: Types.ObjectId) => {
-        const userId = await userModel.findById(id)
-        if (!userId){
-            throw new Error("No User found")
-        };
-        return userId;
+    // static fetchUser = async (id: Types.ObjectId) => {
+    //     const userId = await userModel.findById(id)
+    //     if (!userId){
+    //         throw new Error("No User found")
+    //     };
+    //     return userId;
 
-    };
+    // };
 
-    static updateById = async (id:Types.ObjectId, updateData:any) =>{
-        const user = await userModel.findByIdAndUpdate(id, updateData, {new:true})
-        return user;
-    };
+    // static updateById = async (id:Types.ObjectId, updateData:any) =>{
+    //     const user = await userModel.findByIdAndUpdate(id, updateData, {new:true})
+    //     return user;
+    // };
 
-    static updateByEmail = async (filter:any, update:any) => {
-        const user = await userModel.findOneAndUpdate(filter, update, {new:true})
-        return user;
-    }
+    // static updateByEmail = async (filter:any, update:any) => {
+    //     const user = await userModel.findOneAndUpdate(filter, update, {new:true})
+    //     return user;
+    // }
 
-    static deletUser = async (id: Types.ObjectId) =>{
-       const dltUser = await  userModel.findByIdAndDelete(id)
-       if(!dltUser){
-           throw new Error("User does not Exist")
-       } 
-        return dltUser;
-    };
+    // static deletUser = async (id: Types.ObjectId) =>{
+    //    const dltUser = await  userModel.findByIdAndDelete(id)
+    //    if(!dltUser){
+    //        throw new Error("User does not Exist")
+    //    } 
+    //     return dltUser;
+    // };
 
 }
