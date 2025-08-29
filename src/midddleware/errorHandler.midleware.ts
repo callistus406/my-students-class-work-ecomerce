@@ -11,7 +11,7 @@ class CustomError extends Error {
 
 //
 
-export const newError = (message: string, statusCode: number) => {
+export const throwCustomError = (message: string, statusCode: number) => {
   return new CustomError(message, statusCode);
 };
 
