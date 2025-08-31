@@ -32,3 +32,4 @@ address: {
 })
 
 const merchantModel = mongoose.model("Merchant", merchantSchema)
+export { merchantModel as merchant };
