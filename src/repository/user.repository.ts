@@ -21,18 +21,18 @@ export class UserRepository {
         return response
     };
 
-    static otpVerify = async (email: string, otp: number) => {
-      const response = await OTPModel.findOne({ email, otp });
+    static otpVerify = async (email: string, otp: string) => {
+      const response = await OTPModel.findOne({ email, otp }).select("-__v");
       return response;
     };
 
       static getUsers = async () => {
-        const users = await userModel.find()
-        return users
+        const users = await userModel.find().select("-password,-__v");
+        return users;
     };
 
     static findUserByEmail = async (email: string) => {
-      const user = await userModel.findOne({ email });
+      const user = await userModel.findOne({ email }).select("-password,-__v");
       return user;
     };
 }

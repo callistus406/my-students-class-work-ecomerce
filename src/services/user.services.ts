@@ -3,10 +3,10 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/system.variable";
 import crypto from "crypto";
-import {userModel} from "../models/user.model";
-import { OTPModel} from "../models/otp.model";
-import {customer} from "../models/customer.model";
-import {merchant} from "../models/merchant.model "; 
+import { userModel } from "../models/user.model";
+import { OTPModel } from "../models/otp.model";
+import { customer } from "../models/customer.model";
+import { merchant } from "../models/merchant.model ";
 import { UserRepository } from "../repository/user.repository";
 import { preValidate, userValidate } from "../validation/user.validate";
 import { preRegister, IUsers } from "../interface/user.interface";
@@ -52,7 +52,7 @@ export class UserService {
       throw throwCustomError(error.message, 422);
     }
 
-    if(!user.email.includes("@")){
+    if (!user.email.includes("@")) {
       throw throwCustomError("Invalid email format", 400);
     }
 
@@ -61,9 +61,13 @@ export class UserService {
       throw throwCustomError("Password hashing failed", 400);
     }
     //verify otp
-    const isOtpValid = await UserRepository.otpVerify(user.email, user.otp as any);
+    const isOtpValid = await UserRepository.otpVerify(user.email, user.otp);
     if (!isOtpValid) {
       throw throwCustomError("Invalid OTP", 400);
+    }
+
+    if (isOtpValid.email !== user.email) {
+      throw throwCustomError("The OTP does not belong to this email", 400);
     }
 
     //check if user exists
@@ -78,17 +82,18 @@ export class UserService {
       is_verified: true,
     });
 
-    if(response){
-      if(user.role === "customer"){
-    const customerDoc = await customer.create({ userId: response._id });
-        if(!customerDoc) throw throwCustomError("Customer creation failed", 400)
-          return { success: true, user: response, customer: customerDoc };
-    }else{
-      const merchantDoc = await merchant.create({ userId: response._id });
-      if(!merchantDoc) throw throwCustomError("Merchant creation failed", 400)
-      return  { success: true, user: response, merchant: merchantDoc };
-    }
-
+    if (response) {
+      if (user.role === "customer") {
+        const customerDoc = await customer.create({ userId: response._id });
+        if (!customerDoc)
+          throw throwCustomError("Customer creation failed", 400);
+        return { success: true, user: response, customer: customerDoc };
+      } else {
+        const merchantDoc = await merchant.create({ userId: response._id });
+        if (!merchantDoc)
+          throw throwCustomError("Merchant creation failed", 400);
+        return { success: true, user: response, merchant: merchantDoc };
+      }
     }
 
     if (!response) {
@@ -112,36 +117,35 @@ export class UserService {
     return await UserRepository.getUsers();
   };
 
-  static login = async (email:string, password:string) => {
-      if(!email || !password){
-          throw new Error("Fields cannot be empty")
-      }
-      if (!email.includes("@")){
-          throw new Error("Invalid Email")
-      }
+  static login = async (email: string, password: string) => {
+    if (!email || !password) {
+      throw new Error("Fields cannot be empty");
+    }
+    if (!email.includes("@")) {
+      throw new Error("Invalid Email");
+    }
 
-      const user = await UserRepository.findUserByEmail(email)
+    const user = await UserRepository.findUserByEmail(email);
 
-      if(!user){
-          throw new Error("user does not exist")
-      }
+    if (!user) {
+      throw new Error("user does not exist");
+    }
 
-      const hashedPassword = await bcrypt.compare(
+    const hashedPassword = await bcrypt.compare(
       password,
       user.password as string
     );
     if (!hashedPassword)
       throw throwCustomError("Invalid email or password", 400);
-    
-      const payload = {
-          username: user.firstName,
-          email:user.email,
-      }
-      let jwtKey =  jwt.sign(payload, JWT_SECRET, {expiresIn:"1m"})
-      return {
-          message:"Successfully Loggedin",
-          authKey:jwtKey,
-      }
 
-  }
+    const payload = {
+      username: user.firstName,
+      email: user.email,
+    };
+    let jwtKey = jwt.sign(payload, JWT_SECRET, { expiresIn: "1m" });
+    return {
+      message: "Successfully Loggedin",
+      authKey: jwtKey,
+    };
+  };
 }

@@ -2,8 +2,8 @@ import mongoose, { Schema, Types } from "mongoose";
 import {Iotp} from "../interface/otp.interface";
 
 const otpSchema: Schema<Iotp> = new mongoose.Schema({
-   email:{type:String, require:true},
-   otp:{type:Number, require:true},
+   email:{type:String, required:true},
+   otp:{type:String, required:true},
    createdAt:{type:Date, default:Date.now},
    expiresAt:{type:Date, default:Date.now}
 })
