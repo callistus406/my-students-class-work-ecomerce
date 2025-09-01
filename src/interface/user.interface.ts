@@ -1,23 +1,16 @@
-
-export interface preRegister{
+export interface IPreRegister {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
-   role: "merchant" | "customer";
   isVarified: boolean;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
-export interface IUsers{
-  firstName: string;
-  lastName: string;
+export interface IVerifyUser {
   email: string;
-  password: string;
-  role: "merchant" | "customer";
   otp: string;
-  is_verified: boolean;
-  createdAt: Date;
-  updatedAt: Date;  
 }
+
+// Step: provide basic information
+// step2: confirm account
+// step3: login

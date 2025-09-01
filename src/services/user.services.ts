@@ -9,27 +9,52 @@ import { customer } from "../models/customer.model";
 import { merchant } from "../models/merchant.model ";
 import { UserRepository } from "../repository/user.repository";
 import { preValidate, userValidate } from "../validation/user.validate";
-import { preRegister, IUsers } from "../interface/user.interface";
+import { IPreRegister, IVerifyUser } from "../interface/user.interface";
 import { throwCustomError } from "../midddleware/errorHandler.midleware";
 import { sendMail } from "../until/nodemailer";
 import { otpTemplate } from "../until/otp-template";
 
 export class UserService {
-  static preRegister = async (user: preRegister) => {
+  static preRegister = async (user: IPreRegister) => {
+    //validate user input
     const { error } = preValidate.validate(user);
 
     if (error) {
       throw throwCustomError(error.message, 422);
     }
 
-    //create otp
+    // check if user exists
+    const isFound = await UserRepository.findUserByEmail(user.email);
+    if (isFound)
+      throw throwCustomError("Sorry, you cannnot use this email", 409);
+
+    // verify account state
+    if (isFound && !user.isVarified)
+      throw throwCustomError("Please verify your account", 400);
+    // generate password
+    const hashedPassword = await bcrypt.hash(user.password, 5);
+    if (!hashedPassword) throw throwCustomError("Password hashing failed", 400);
+
+    // if user  does not exist  create user
+    const response = await UserRepository.createUser({
+      ...user,
+      password: hashedPassword,
+      isVarified: false,
+    });
+    if (!response) throw throwCustomError("Unable to create account", 500);
+    // gen otp
     const otp = await UserService.generateOtp(user.email);
     if (!otp) {
       throw throwCustomError("OTP generation failed", 400);
     }
-    console.log(otp);
-    // send otp via mail
 
+    // save otp
+    const saveOtp = await UserRepository.saveOtp(user.email, otp.toString());
+
+    if (!saveOtp) {
+      return "Account created, Successfully, please request for OTP to continue";
+    }
+    // send otp via mail
     sendMail(
       {
         email: user.email,
@@ -42,65 +67,35 @@ export class UserService {
       otpTemplate
     );
 
-    return "An email has been sent to your inbox";
+    // send response to the user
+
+    return "Account created, Successfully. Please check your email for OTP to continue";
   };
 
-  static Register = async (user: IUsers) => {
+  static Register = async (user: IVerifyUser) => {
     const { error } = userValidate.validate(user);
 
     if (error) {
       throw throwCustomError(error.message, 422);
     }
 
-    if (!user.email.includes("@")) {
-      throw throwCustomError("Invalid email format", 400);
+    // get email form db
+    const isFound = await UserRepository.findUserByEmail(user.email);
+    if (!isFound) {
+      throw throwCustomError("Invalid account", 404);
     }
-
-    const hashedPassword = await bcrypt.hash(user.password, 10);
-    if (!hashedPassword) {
-      throw throwCustomError("Password hashing failed", 400);
-    }
-    //verify otp
+    // verify otp
     const isOtpValid = await UserRepository.otpVerify(user.email, user.otp);
-    if (!isOtpValid) {
+    //confirm account
+
+    //verify otp
+    if (!isOtpValid || isOtpValid.otp !== user.otp) {
       throw throwCustomError("Invalid OTP", 400);
     }
 
-    if (isOtpValid.email !== user.email) {
-      throw throwCustomError("The OTP does not belong to this email", 400);
-    }
+    await UserRepository.updateUser(isFound._id);
 
-    //check if user exists
-    const isFound = await UserRepository.findUserByEmail(user.email);
-    if (isFound) {
-      throw throwCustomError("User already exists", 400);
-    }
-
-    const response = await UserRepository.register({
-      ...user,
-      password: hashedPassword,
-      is_verified: true,
-    });
-
-    if (response) {
-      if (user.role === "customer") {
-        const customerDoc = await customer.create({ userId: response._id });
-        if (!customerDoc)
-          throw throwCustomError("Customer creation failed", 400);
-        return { success: true, user: response, customer: customerDoc };
-      } else {
-        const merchantDoc = await merchant.create({ userId: response._id });
-        if (!merchantDoc)
-          throw throwCustomError("Merchant creation failed", 400);
-        return { success: true, user: response, merchant: merchantDoc };
-      }
-    }
-
-    if (!response) {
-      throw new Error("User registration failed");
-    }
-
-    return response;
+    return "Account is verified, You can now login";
   };
 
   static async generateOtp(email: string) {
