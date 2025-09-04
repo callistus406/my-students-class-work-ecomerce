@@ -25,7 +25,7 @@ export class UserRepository {
 
   static updateUser = async (userId: Types.ObjectId) => {
     const response = await otpModel.findByIdAndUpdate(userId, {
-      is_Varified: true,
+      is_verified: true,
     });
 
     return response;

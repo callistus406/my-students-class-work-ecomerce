@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { IVerifyUser } from "../interface/user.interface";
-import { UserService } from "../services/user.services";
+import { UserService } from "../services/auth.services";
 
 export class AppController {
   static preRegister = async (req: Request, res: Response) => {
