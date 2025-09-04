@@ -1,15 +1,14 @@
 import express from "express";
 
 import { authMiddleware } from "../midddleware/auth.middleware";
-import { UserController } from "../controller/user.controller";
-
-
+import { AuthController } from "../controller/auth.controller";
 
 const router = express.Router();
 
-router.post("/preregister", UserController.preRegister);
-router.post("/register", UserController.registration);
-router.get("/getuser", UserController.getUser);
-router.get("/login", UserController.login);
+router.post("/pre-register", AuthController.preRegister);
+router.post("/register", AuthController.registration);
+router.get("/get-user", authMiddleware as any, AuthController.getUser);
+router.get("/login", AuthController.login);
+router.post("/upgrade-kyc", authMiddleware as any, AuthController.verifyKyc);
 
 export default router;

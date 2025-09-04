@@ -3,7 +3,7 @@ export interface IPreRegister {
   lastName: string;
   email: string;
   password: string;
-  isVarified: boolean;
+  isVerified: boolean;
 }
 
 export interface IVerifyUser {

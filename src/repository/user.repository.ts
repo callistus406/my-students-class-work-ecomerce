@@ -34,6 +34,14 @@ export class UserRepository {
     const user = await userModel.findOne({ email }).select("-password,-__v");
     return user;
   };
+
+  static async findUserById(userId: Types.ObjectId) {
+    const response = await userModel
+      .findById({ userId })
+      .select("-password, -__v");
+    if (!response) return null;
+    return response;
+  }
   static saveOtp = async (email: string, otp: string) => {
     const res = await otpModel.findOneAndUpdate(
       {
@@ -50,4 +58,38 @@ export class UserRepository {
 
     return res;
   };
+  static async login(email: string, password: string): Promise<any> {
+    const user = await userModel.findOne({ email, password });
+    return user;
+  }
+  //============================||VERIFY KYC ||=============================
+
+  static async saveKyc(data: {
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string;
+    nin: string;
+    bvn: string;
+    userId: Types.ObjectId;
+  }) {
+    const response = await userModel.findByIdAndUpdate(
+      data.userId,
+      {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        dateOfBirth: data.dateOfBirth,
+        nin: data.nin,
+        bvn: data.bvn,
+        is_verified: true,
+      },
+      { new: true }
+    );
+    if (!response) return null;
+    return response;
+  }
+
+  //====================|| UPGRADE TO CUSTOMER OR MERCHANT ||==================
+  static async upgradeRole(filter: any, update: any): Promise<any> {
+    const response = await userModel.updateOne(filter, update, { new: true });
+  }
 }

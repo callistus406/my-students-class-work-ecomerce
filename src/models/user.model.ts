@@ -11,6 +11,16 @@ export const userSchema = new Schema({
     default: "customer",
   },
   otp: { type: String, require: true },
+  dateOfBirth: {
+    type: Date,
+    require: true,
+  },
+  nin: {
+    type: String,
+  },
+  bvn: {
+    type: String,
+  },
   is_verified: { type: Boolean, require: true, default: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
