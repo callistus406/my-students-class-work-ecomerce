@@ -4,15 +4,15 @@ import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/system.variable";
 import crypto from "crypto";
 import { userModel } from "../models/user.model";
-import { OTPModel } from "../models/otp.model";
+import { otpModel } from "../models/otp.model";
 import { customer } from "../models/customer.model";
 import { merchant } from "../models/merchant.model ";
 import { UserRepository } from "../repository/user.repository";
 import { preValidate, userValidate } from "../validation/user.validate";
 import { IPreRegister, IVerifyUser } from "../interface/user.interface";
 import { throwCustomError } from "../midddleware/errorHandler.midleware";
-import { sendMail } from "../until/nodemailer";
-import { otpTemplate } from "../until/otp-template";
+import { sendMail } from "../util/nodemailer";
+import { otpTemplate } from "../util/otp-template";
 
 export class UserService {
   static preRegister = async (user: IPreRegister) => {
@@ -29,7 +29,7 @@ export class UserService {
       throw throwCustomError("Sorry, you cannnot use this email", 409);
 
     // verify account state
-    if (isFound && !user.isVarified)
+    if (isFound && !user.is_Varified)
       throw throwCustomError("Please verify your account", 400);
     // generate password
     const hashedPassword = await bcrypt.hash(user.password, 5);
@@ -39,9 +39,10 @@ export class UserService {
     const response = await UserRepository.createUser({
       ...user,
       password: hashedPassword,
-      isVarified: false,
+       is_Varified: false,
     });
     if (!response) throw throwCustomError("Unable to create account", 500);
+
     // gen otp
     const otp = await UserService.generateOtp(user.email);
     if (!otp) {
@@ -93,7 +94,7 @@ export class UserService {
       throw throwCustomError("Invalid OTP", 400);
     }
 
-    await UserRepository.updateUser(isFound._id);
+    await UserRepository.updateUser(isFound._id,);
 
     return "Account is verified, You can now login";
   };
@@ -103,7 +104,10 @@ export class UserService {
     console.log("Generated OTP:", otp);
     // save otp
 
-    await OTPModel.create({ email, otp });
+    const savedOtp = await otpModel.create({ email, otp });
+    if (!savedOtp) {
+      throw throwCustomError("Unable to generate OTP", 500);
+    }
 
     return otp;
   }
