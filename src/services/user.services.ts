@@ -39,7 +39,7 @@ export class UserService {
     const response = await UserRepository.createUser({
       ...user,
       password: hashedPassword,
-       is_Varified: false,
+      is_Varified: false,
     });
     if (!response) throw throwCustomError("Unable to create account", 500);
 
@@ -48,7 +48,7 @@ export class UserService {
     if (!otp) {
       throw throwCustomError("OTP generation failed", 400);
     }
-
+    //hash otp
     // save otp
     const saveOtp = await UserRepository.saveOtp(user.email, otp.toString());
 
@@ -85,6 +85,8 @@ export class UserService {
     if (!isFound) {
       throw throwCustomError("Invalid account", 404);
     }
+
+    //compare otp
     // verify otp
     const isOtpValid = await UserRepository.otpVerify(user.email, user.otp);
     //confirm account
@@ -94,7 +96,7 @@ export class UserService {
       throw throwCustomError("Invalid OTP", 400);
     }
 
-    await UserRepository.updateUser(isFound._id,);
+    await UserRepository.updateUser(isFound._id);
 
     return "Account is verified, You can now login";
   };
@@ -104,7 +106,7 @@ export class UserService {
     console.log("Generated OTP:", otp);
     // save otp
 
-    const savedOtp = await otpModel.create({ email, otp });
+    const savedOtp = await UserRepository.saveOtp(email, otp.toString());
     if (!savedOtp) {
       throw throwCustomError("Unable to generate OTP", 500);
     }
@@ -119,9 +121,6 @@ export class UserService {
   static login = async (email: string, password: string) => {
     if (!email || !password) {
       throw new Error("Fields cannot be empty");
-    }
-    if (!email.includes("@")) {
-      throw new Error("Invalid Email");
     }
 
     const user = await UserRepository.findUserByEmail(email);
@@ -147,4 +146,12 @@ export class UserService {
       authKey: jwtKey,
     };
   };
+
+  // request otp
+  //request reset password {email to send to recieve otp}
+  //reset password
+  //{email, otp, new password}
+  // verify otp {not compulsory}
+
+  // hash the otp 1 round
 }

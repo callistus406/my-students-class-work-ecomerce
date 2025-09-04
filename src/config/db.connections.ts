@@ -1,13 +1,11 @@
 import mongoose from "mongoose";
-import {dburl} from "../config/system.variable"
+import { dburl } from "../config/system.variable";
 
-export const mongoConnection = async() => {
-    try {
-         await mongoose.connect(dburl);
-         console.log("database connected")
-    } catch (error) {
-        console.log("database disconnected")
-        
-    }
-   
-}
+export const mongoConnection = async () => {
+  try {
+    await mongoose.connect(dburl);
+    console.log("database connected");
+  } catch (error) {
+    console.log("unable to connect to database", error);
+  }
+};

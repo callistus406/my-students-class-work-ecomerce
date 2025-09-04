@@ -11,12 +11,11 @@ export class UserRepository {
     return response;
   };
 
-  static createOtp = async ( email: string, otp: string) => {
+  static createOtp = async (email: string, otp: string) => {
     const response = await otpModel.create({ email, otp });
     if (!response) return null;
     return response;
-
-  }
+  };
 
   static otpVerify = async (email: string, otp: string) => {
     const response = await otpModel.findOneAndDelete({ email, otp });
@@ -33,9 +32,11 @@ export class UserRepository {
   };
 
   static deleteUser = async (userId: string) => {
-    const user = await userModel.findByIdAndDelete(userId).select("-password,-__v");
+    const user = await userModel
+      .findByIdAndDelete(userId)
+      .select("-password,-__v");
     return user;
-  }
+  };
 
   static getUserById = async (userId: string) => {
     const user = await userModel.findById(userId).select("-password,-__v");
@@ -63,7 +64,8 @@ export class UserRepository {
         email,
       },
       {
-        otp, createdAt: new Date()
+        otp,
+        createdAt: new Date(),
       },
       {
         new: true,
