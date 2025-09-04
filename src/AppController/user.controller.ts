@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
-import { IUsers } from "../interface/user.interface";
+import { IVerifyUser } from "../interface/user.interface";
 import { UserService } from "../services/user.services";
-import { AnyARecord } from "dns";
 
-export class UserController {
+export class AppController {
   static preRegister = async (req: Request, res: Response) => {
     try {
       const user = req.body;
@@ -11,6 +10,7 @@ export class UserController {
       console.log(response);
       res.status(201).json({ success: true, payload: response });
     } catch (error: any) {
+      console.log(error);
       res.status(400).json({
         success: false,
         message: error.message,
@@ -20,7 +20,7 @@ export class UserController {
 
   static registration = async (req: Request, res: Response) => {
     try {
-      const user = req.body as IUsers;
+      const user = req.body as IVerifyUser;
       const response = await UserService.Register(user);
       console.log(response);
       res.status(201).json({ success: true, payload: response });
