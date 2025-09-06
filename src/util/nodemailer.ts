@@ -10,7 +10,7 @@ let configOptions = {
 };
 
 export const sendMail = async (
-  data: { email: string; subject: string; emailInfo:any },
+  data: { email: string; subject: string; emailInfo: any },
   cb: Function
 ) => {
   try {
