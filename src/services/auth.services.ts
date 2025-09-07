@@ -3,7 +3,6 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/system.variable";
 import crypto from "crypto";
-import { userModel } from "../models/user.model";
 import { otpModel } from "../models/otp.model";
 import { customer } from "../models/customer.model";
 import { merchant } from "../models/merchant.model ";
@@ -87,6 +86,10 @@ export class UserService {
     }
 
     //compare otp
+    const compareOtp = await UserRepository.getOtp(user.email);
+    if (!compareOtp || compareOtp.otp !== user.otp) {
+      throw throwCustomError("Invalid OTP111", 400);
+    }
     // verify otp
     const isOtpValid = await UserRepository.otpVerify(user.email, user.otp);
     //confirm account
@@ -113,6 +116,83 @@ export class UserService {
 
     return otp;
   }
+
+    // request otp
+  static requestOtp = async (email:string) =>{
+    if(!email) throw throwCustomError("Email is required",400);
+    const user = await UserRepository.findUserByEmail(email);
+    if(!user) throw throwCustomError("User not found",404);
+
+    const otp = await UserService.generateOtp(email);
+    console.log("do not share with anyone",otp);
+    if(!otp) throw throwCustomError("Unable to generate OTP",500);
+    // send otp via mail
+    sendMail(
+      {
+        email: email,
+        subject: "OTP VERIFICATION",
+        emailInfo: {
+          otp: otp.toString(),
+          name: `${user.firstName} ${user.lastName}`,
+        },
+      },
+      otpTemplate
+    );
+
+    return "OTP sent to your email";
+
+  }
+
+  //request reset password {email to send to recieve otp}
+
+  static requestPasswordReset = async (email: string) => {
+    if (!email) throw throwCustomError("Email is required", 400);
+    const user = await UserRepository.findUserByEmail(email);
+    if (!user) throw throwCustomError("User not found", 404);
+
+    const otp = await UserService.generateOtp(email);
+    console.log("do not share with anyone", otp);
+    if (!otp) throw throwCustomError("Unable to generate OTP", 500);
+    // send otp via mail
+    sendMail(
+      {
+        email: email,
+        subject: "OTP VERIFICATION",
+        emailInfo: {
+          otp: otp.toString(),
+          name: `${user.firstName} ${user.lastName}`,
+        },
+      },
+      otpTemplate
+    );
+
+    return "OTP sent to your email";
+
+  }
+
+//reset password
+
+  static resetPassword = async (email: string, otp: string, newPassword: string) => {
+    if (!email || !otp || !newPassword) {
+      throw throwCustomError("All fields are required", 400);
+    }
+
+    const isOtpValid = await UserRepository.otpVerify(email, otp);
+    if (!isOtpValid) {
+      throw throwCustomError("Invalid OTP", 400);
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    if (!hashedPassword) {
+      throw throwCustomError("Password hashing failed", 500);
+    }
+    const response = await UserRepository.resetPassword(email, otp, hashedPassword);
+    if (!response) {
+      throw throwCustomError("Unable to reset password", 500);
+    }
+
+    return "Password reset successfully";
+  };
 
   static getUser = async () => {
     return await UserRepository.getUsers();
@@ -147,11 +227,10 @@ export class UserService {
     };
   };
 
-  // request otp
+  // request otp   done
   //request reset password {email to send to recieve otp}
   //reset password
   //{email, otp, new password}
   // verify otp {not compulsory}
-
   // hash the otp 1 round
 }

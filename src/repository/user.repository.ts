@@ -31,6 +31,15 @@ export class UserRepository {
     return response;
   };
 
+  static requestOtp = async (email: string, otp: string) => {
+    const response = await otpModel.findOneAndUpdate(
+      { email },
+      { otp, createdAt: new Date() },
+      { new: true, upsert: true }
+    );
+    return response;
+  };
+
   static deleteUser = async (userId: string) => {
     const user = await userModel
       .findByIdAndDelete(userId)
@@ -53,11 +62,6 @@ export class UserRepository {
     return user;
   };
 
-  static async createotp(email: string, otp: string) {
-    const res = await otpModel.create({ email, otp });
-    return res;
-  }
-
   static saveOtp = async (email: string, otp: string) => {
     const res = await otpModel.findOneAndUpdate(
       {
@@ -74,5 +78,34 @@ export class UserRepository {
     );
 
     return res;
+  };
+
+  static getOtp = async (email: string) => {
+    const response = await otpModel.findOne({ email });
+    if (!response) return null;
+    return response;
+  };
+
+  static requestPasswordReset = async (email: string, otp: string) => {
+    const response = await otpModel.findOneAndUpdate(
+      { email },
+      { otp, createdAt: new Date() },
+      { new: true, upsert: true }
+    );
+    return response;
+  }
+
+  static resetPassword = async (
+    email: string,
+    otp: string,
+    newPassword: string,
+    is_verified = true
+  ) => {
+    const response = await userModel.findOneAndUpdate(
+      { email },
+      { password: newPassword, is_verified },
+      { otp, createdAt: new Date(), new: true, upsert: true },
+    );
+    return response;
   };
 }
