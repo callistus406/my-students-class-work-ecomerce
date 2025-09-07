@@ -10,6 +10,7 @@ export interface IPreRegister {
 export interface IVerifyUser {
   email: string;
   otp: string;
+  is_Varified: true;
 }
 
 // Step: provide basic information

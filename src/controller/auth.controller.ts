@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { IVerifyUser } from "../interface/user.interface";
 import { UserService } from "../services/user.services";
-import { AnyARecord } from "dns";
 import { asyncWrapper } from "../midddleware/asyncWrapper";
 import { IRequest } from "../midddleware/auth.middleware";
 
@@ -13,6 +12,7 @@ export class AuthController {
       console.log(response);
       res.status(201).json({ success: true, payload: response });
     } catch (error: any) {
+      console.log(error);
       res.status(400).json({
         success: false,
         message: error.message,
@@ -24,9 +24,53 @@ export class AuthController {
     try {
       const user = req.body as IVerifyUser;
       const response = await UserService.Register(user);
+      res.status(201).json({ success: true, payload: response });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };
+
+  static requestOtp = async (req: Request, res: Response) => {
+    try {
+      const email = req.body.email;
+      const response = await UserService.requestOtp(email);
       console.log(response);
       res.status(201).json({ success: true, payload: response });
     } catch (error: any) {
+      console.log(error);
+      res.status(401).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };
+
+  static requestPasswordReset = async (req: Request, res: Response) => {
+    try {
+      const email = req.body.email;
+      const response = await UserService.requestPasswordReset(email);
+      console.log(response);
+      res.status(201).json({ success: true, payload: response });
+    } catch (error: any) {
+      console.log(error);
+      res.status(401).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };
+
+  static resetPassword = async (req: Request, res: Response) => {
+    try {
+      const { email, otp, newPassword } = req.body;
+      const response = await UserService.resetPassword(email, otp, newPassword);
+      console.log(response);
+      res.status(200).json({ success: true, payload: response });
+    } catch (error: any) {
+      console.log(error);
       res.status(400).json({
         success: false,
         message: error.message,
