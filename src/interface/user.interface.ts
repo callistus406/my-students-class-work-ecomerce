@@ -3,6 +3,7 @@ export interface IPreRegister {
   lastName: string;
   email: string;
   password: string;
+  role: string;
   isVerified: boolean;
 }
 

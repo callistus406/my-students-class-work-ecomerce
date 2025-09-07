@@ -5,14 +5,14 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { userModel } from "../models/user.model";
 import { otpModel } from "../models/otp.model";
-import { customer } from "../models/customer.model";
-import { merchant } from "../models/merchant.model ";
+// import { customer } from "../models/customer.model";
+// import { merchant } from "../models/merchant.model ";
 import { UserRepository } from "../repository/user.repository";
 import {
   loginValidate,
   preValidate,
   userValidate,
-  validateKyc,
+  kycValidate,
 } from "../validation/user.validate";
 import { IPreRegister, IVerifyUser } from "../interface/user.interface";
 import { throwCustomError } from "../midddleware/errorHandler.midleware";
@@ -20,6 +20,11 @@ import { sendMail } from "../utils/nodemailer";
 import { otpTemplate } from "../utils/otp-template";
 import { confirmationTemplate } from "../utils/login-confirmation-template";
 import { kycRecords } from "../utils/kyc-records";
+import { customerModel } from "../models/customer.model";
+import { merchantModel } from "../models/merchant.model ";
+import { CustomerRepository } from "../repository/customer-repository";
+import { MerchantRepository } from "../repository/merchant-repository";
+import { response } from "express";
 
 export class UserService {
   static preRegister = async (user: IPreRegister) => {
@@ -49,6 +54,21 @@ export class UserService {
       isVerified: false,
     });
     if (!response) throw throwCustomError("Unable to create account", 500);
+
+    // gen role
+    if (response.role === "customer") {
+      const role = await CustomerRepository.createCustomer(response._id);
+      if (!role) {
+        throw throwCustomError("Unable to create a merchant account", 423);
+      }
+    }
+    if (response.role === "merchant") {
+      const merchantRole = MerchantRepository.createMerchant(response._id);
+      if (!merchantRole) {
+        throw throwCustomError("Unable to create a merchant account", 423);
+      }
+    }
+
     // gen otp
     const otp = await UserService.generateOtp(user.email);
     if (!otp) {
@@ -149,8 +169,9 @@ export class UserService {
     };
 
     const jwtSecret = process.env.JWT_ADMIN_KEY as string;
+    const jwtExpire = process.env.JWT_EXP;
 
-    let jwtKey = jwt.sign(payload, jwtSecret, { expiresIn: "20m" } as any);
+    let jwtKey = jwt.sign(payload, jwtSecret, { expiresIn: jwtExpire } as any);
     if (!jwtKey) {
       throw throwCustomError("Unable to Login", 500);
     }
@@ -184,25 +205,51 @@ export class UserService {
   }) {
     const { firstName, lastName, dateOfBirth, nin, bvn, userId } = data;
 
+    const { error } = kycValidate.validate({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      dateOfBirth: data.dateOfBirth,
+      nin: data.nin,
+      bvn: data.bvn,
+    });
+    if (error) {
+      throw throwCustomError(error.message, 410);
+    }
     //check if user exist
     const user = await UserRepository.findUserById(data.userId);
     if (!user) {
       throw throwCustomError("no record found", 422);
     }
-    //check if user is already verified
+    // check if user is already verified
     if (user.is_verified) {
-      throw throwCustomError("Your account is already verified", 412);
+      throw throwCustomError(
+        `Your ${user.role} account is already verified`,
+        412
+      );
     }
-    const { error } = validateKyc.validate({
-      firstName: user.firstName,
-      lastName: user.lastName,
-      dateOfBirth: user.dateOfBirth,
-      nin: user.nin,
-      bvn: user.bvn,
-    });
-    if (error) {
-      throw throwCustomError(error.message, 409);
+
+    if (user) {
+      //   if (user.role === "customer") {
+      //     const customer = await CustomerRepository.createCustomer(user);
+      //     if (!customer) {
+      //       throw throwCustomError("Unable to create a customer account", 403);
+      //     }
+      //   }
+      //   if (user.role === "merchant") {
+      //     // const replace = await UserRepository.findUserById(user._id);
+      //     // if (!replace) {
+      //     //   throw throwCustomError("Unable to delete account", 404);
+      //     // }
+      //     const merchant = await MerchantRepository.createMerchant(user);
+      //     if (!merchant) {
+      //       throw throwCustomError("Unable to create a merchant account", 403);
+      //     }
+      //   }
+      // if (!user.role) {
+      //   throw throwCustomError("Unable to generate an account", 404);
+      // }
     }
+
     //call external API
     const isUser = kycRecords.find(
       (item) =>
@@ -265,8 +312,36 @@ export class UserService {
     //   }
     // }
     if (!validate) {
-      throw throwCustomError("Unable to verify KY", 422);
+      throw throwCustomError("Unable to verify KYC", 422);
     }
-    return "Your KYC has been Verified";
+    return `Your ${user.role} account has been Verified`;
+  }
+
+  static async upgardeRole(userId: Types.ObjectId, role: string) {
+    const response = await UserRepository.findUserById(userId);
+
+    if (response) {
+      if (response.role === "customer") {
+        const customer = await CustomerRepository.createCustomer(response.id);
+        if (!customer) {
+          throw throwCustomError("Unable to create a customer account", 403);
+        }
+      }
+      if (response.role === "merchant") {
+        const merchant = await MerchantRepository.createMerchant(response.id);
+        if (!merchant) {
+          throw throwCustomError("Unable to create a merchant account", 403);
+        }
+      }
+    }
+    if (!response) {
+      throw throwCustomError("No User found", 404);
+    }
+
+    const res = await UserRepository.upgradeRole(userId, role);
+    if (!res) {
+      throw throwCustomError("Ubable to upgrade account", 405);
+    }
+    return `You've been upgraded to ${role}`;
   }
 }

@@ -67,6 +67,7 @@ export class AuthController {
 
   // ==================|| KYC VERIFICATION ||==============================================
   static verifyKyc = asyncWrapper(async (req: IRequest, res: Response) => {
+    // req.body.role = req.body.role.toLowerCase();
     const { firstName, lastName, dateOfBirth, bvn, nin } = req.body;
 
     const userId = req.user.id;

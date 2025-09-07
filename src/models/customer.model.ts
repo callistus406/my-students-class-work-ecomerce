@@ -5,7 +5,13 @@ const customerSchema = new Schema(
     userId: { type: Types.ObjectId, require: true, unique: true, ref: "User" },
     firstName: { type: String, require: true },
     lastName: { type: String, require: true },
-    phoneNumber: { type: Number, require: true },
+    phoneNumber: {
+      type: Number,
+      require: true,
+      partialFilterExpression: {
+        phone_number: { $exist: true, $ne: null },
+      },
+    },
     addresses: {
       label: { type: String },
       street: { type: String, require: true },
@@ -22,5 +28,4 @@ const customerSchema = new Schema(
   { timestamps: true }
 );
 
-const customerModel = mongoose.model("Customer", customerSchema);
-export { customerModel as customer };
+export const customerModel = mongoose.model("Customer", customerSchema);

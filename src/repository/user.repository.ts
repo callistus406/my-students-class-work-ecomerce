@@ -3,6 +3,8 @@ import { Types } from "mongoose";
 import { userModel } from "../models/user.model";
 import { otpModel } from "../models/otp.model";
 import { IPreRegister } from "../interface/user.interface";
+import { throwCustomError } from "../midddleware/errorHandler.midleware";
+import { customerModel } from "../models/customer.model";
 
 export class UserRepository {
   static createUser = async (user: IPreRegister) => {
@@ -36,10 +38,10 @@ export class UserRepository {
   };
 
   static async findUserById(userId: Types.ObjectId) {
-    const response = await userModel
-      .findById({ userId })
-      .select("-password, -__v");
-    if (!response) return null;
+    const response = await userModel.findById({ _id: userId });
+    if (!Types.ObjectId.isValid(userId)) {
+      throw throwCustomError("Invalid User ID", 406);
+    }
     return response;
   }
   static saveOtp = async (email: string, otp: string) => {
@@ -88,8 +90,22 @@ export class UserRepository {
     return response;
   }
 
+  static async deleteRole(userId: Types.ObjectId) {
+    const record = await customerModel.findByIdAndDelete({ __id: userId });
+    if (!record) return null;
+    return record;
+  }
+
   //====================|| UPGRADE TO CUSTOMER OR MERCHANT ||==================
-  static async upgradeRole(filter: any, update: any): Promise<any> {
-    const response = await userModel.updateOne(filter, update, { new: true });
+  static async upgradeRole(userId: Types.ObjectId, role: string): Promise<any> {
+    const response = await userModel.findByIdAndUpdate(
+      userId,
+      { role },
+      {
+        new: true,
+      }
+    );
+    if (!response) return null;
+    return response;
   }
 }
