@@ -295,53 +295,38 @@ export class UserService {
       bvn,
       userId,
     });
-    //check email validity
-    // const isEmail = await UserRepository.findUserByEmail(email);
-    // if (!isEmail) {
-    //   throw throwCustomError("Invaliid email", 402);
-    // }
-    // const filter = { email };
-    // //Update Role
-    // if (isEmail) {
-    //   if (user.role !== "customer") {
-    //     const update = { role };
-    //     const res = await UserRepository.upgradeRole(filter, update);
-    //     if (!res) {
-    //       throw throwCustomError("Failed to verify KYC", 420);
-    //     }
-    //   }
-    // }
+
     if (!validate) {
       throw throwCustomError("Unable to verify KYC", 422);
     }
     return `Your ${user.role} account has been Verified`;
   }
 
-  static async upgardeRole(userId: Types.ObjectId, role: string) {
-    const response = await UserRepository.findUserById(userId);
+  //   static async upgardeRole(userId: Types.ObjectId, role: string) {
+  //     const response = await UserRepository.findUserById(userId);
 
-    if (response) {
-      if (response.role === "customer") {
-        const customer = await CustomerRepository.createCustomer(response.id);
-        if (!customer) {
-          throw throwCustomError("Unable to create a customer account", 403);
-        }
-      }
-      if (response.role === "merchant") {
-        const merchant = await MerchantRepository.createMerchant(response.id);
-        if (!merchant) {
-          throw throwCustomError("Unable to create a merchant account", 403);
-        }
-      }
-    }
-    if (!response) {
-      throw throwCustomError("No User found", 404);
-    }
+  //     if (response) {
+  //       if (response.role === "customer") {
+  //         const customer = await CustomerRepository.createCustomer(response.id);
+  //         if (!customer) {
+  //           throw throwCustomError("Unable to create a customer account", 403);
+  //         }
+  //       }
+  //       if (response.role === "merchant") {
+  //         const merchant = await MerchantRepository.createMerchant(response.id);
+  //         if (!merchant) {
+  //           throw throwCustomError("Unable to create a merchant account", 403);
+  //         }
+  //       }
+  //     }
+  //     if (!response) {
+  //       throw throwCustomError("No User found", 404);
+  //     }
 
-    const res = await UserRepository.upgradeRole(userId, role);
-    if (!res) {
-      throw throwCustomError("Ubable to upgrade account", 405);
-    }
-    return `You've been upgraded to ${role}`;
-  }
+  //     const res = await UserRepository.upgradeRole(userId, role);
+  //     if (!res) {
+  //       throw throwCustomError("Ubable to upgrade account", 405);
+  //     }
+  //     return `You've been upgraded to ${role}`;
+  //   }
 }
