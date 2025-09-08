@@ -6,6 +6,10 @@ import { IRequest } from "../midddleware/auth.middleware";
 
 export class AuthController {
   static preRegister = async (req: Request, res: Response) => {
+    req.body.email = req.body.email.toLowerCase();
+    req.body.firstName = req.body.firstName.toLowerCase();
+    req.body.lastName = req.body.lastName.toLowerCase();
+    req.body.role = req.body.role.toLowerCase();
     try {
       const user = req.body;
       const response = await UserService.preRegister(user);
@@ -21,6 +25,8 @@ export class AuthController {
   };
 
   static registration = async (req: Request, res: Response) => {
+    req.body.email = req.body.email.toLowerCase();
+
     try {
       const user = req.body as IVerifyUser;
       const response = await UserService.Register(user);
@@ -34,6 +40,8 @@ export class AuthController {
   };
 
   static requestOtp = async (req: Request, res: Response) => {
+    req.body.email = req.body.email.toLowerCase();
+
     try {
       const email = req.body.email;
       const response = await UserService.requestOtp(email);
@@ -49,6 +57,8 @@ export class AuthController {
   };
 
   static requestPasswordReset = async (req: Request, res: Response) => {
+    req.body.email = req.body.email.toLowerCase();
+
     try {
       const email = req.body.email;
       const response = await UserService.requestPasswordReset(email);
@@ -64,6 +74,8 @@ export class AuthController {
   };
 
   static resetPassword = async (req: Request, res: Response) => {
+    req.body.email = req.body.email.toLowerCase();
+
     try {
       const { email, otp, newPassword } = req.body;
       const response = await UserService.resetPassword(email, otp, newPassword);
@@ -94,6 +106,8 @@ export class AuthController {
   };
 
   static login = asyncWrapper(async (req: Request, res: Response) => {
+    req.body.email = req.body.email.toLowerCase();
+
     const { email, password } = req.body;
     const ipAddress = req.ip as string;
     const userAgent = req.headers["user-agent"] as string;
@@ -111,7 +125,9 @@ export class AuthController {
 
   // ==================|| KYC VERIFICATION ||==============================================
   static verifyKyc = asyncWrapper(async (req: IRequest, res: Response) => {
-    // req.body.role = req.body.role.toLowerCase();
+    req.body.firstName = req.body.firstName.toLowerCase();
+    req.body.lastName = req.body.lastName.toLowerCase();
+
     const { firstName, lastName, dateOfBirth, bvn, nin } = req.body;
 
     const userId = req.user.id;

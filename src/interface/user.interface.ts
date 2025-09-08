@@ -4,13 +4,13 @@ export interface IPreRegister {
   email: string;
   password: string;
   role: string;
-  isVerified: boolean;
+  is_verified: boolean;
 }
 
 export interface IVerifyUser {
   email: string;
   otp: string;
-  is_Varified: true;
+  is_verified: true;
 }
 
 // Step: provide basic information

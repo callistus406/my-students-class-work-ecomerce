@@ -1,12 +1,8 @@
 import { Types } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-// import { JWT_ADMIN_KEY } from "../config/system.variable";
 import crypto from "crypto";
-import { userModel } from "../models/user.model";
 import { otpModel } from "../models/otp.model";
-// import { customer } from "../models/customer.model";
-// import { merchant } from "../models/merchant.model ";
 import { UserRepository } from "../repository/user.repository";
 import {
   loginValidate,
@@ -20,11 +16,8 @@ import { sendMail } from "../utils/nodemailer";
 import { otpTemplate } from "../utils/otp-template";
 import { confirmationTemplate } from "../utils/login-confirmation-template";
 import { kycRecords } from "../utils/kyc-records";
-import { customerModel } from "../models/customer.model";
-import { merchantModel } from "../models/merchant.model ";
 import { CustomerRepository } from "../repository/customer-repository";
 import { MerchantRepository } from "../repository/merchant-repository";
-import { response } from "express";
 
 export class UserService {
   static preRegister = async (user: IPreRegister) => {
@@ -41,7 +34,7 @@ export class UserService {
       throw throwCustomError("Sorry, you cannnot use this email", 409);
 
     // verify account state
-    if (isFound && !user.isVerified)
+    if (isFound && !user.is_verified)
       throw throwCustomError("Please verify your account", 400);
     // generate password
     const hashedPassword = await bcrypt.hash(user.password, 5);
@@ -51,7 +44,7 @@ export class UserService {
     const response = await UserRepository.createUser({
       ...user,
       password: hashedPassword,
-      isVerified: false,
+      is_verified: false,
     });
     if (!response) throw throwCustomError("Unable to create account", 500);
 
@@ -59,13 +52,13 @@ export class UserService {
     if (response.role === "customer") {
       const role = await CustomerRepository.createCustomer(response._id);
       if (!role) {
-        throw throwCustomError("Unable to create a merchant account", 423);
+        throw throwCustomError("Unable to create a Customer account", 423);
       }
     }
     if (response.role === "merchant") {
       const merchantRole = MerchantRepository.createMerchant(response._id);
       if (!merchantRole) {
-        throw throwCustomError("Unable to create a merchant account", 423);
+        throw throwCustomError("Unable to create a Merchant account", 423);
       }
     }
 
@@ -321,39 +314,31 @@ export class UserService {
       );
     }
 
-    if (user) {
-      //   if (user.role === "customer") {
-      //     const customer = await CustomerRepository.createCustomer(user);
-      //     if (!customer) {
-      //       throw throwCustomError("Unable to create a customer account", 403);
-      //     }
-      //   }
-      //   if (user.role === "merchant") {
-      //     // const replace = await UserRepository.findUserById(user._id);
-      //     // if (!replace) {
-      //     //   throw throwCustomError("Unable to delete account", 404);
-      //     // }
-      //     const merchant = await MerchantRepository.createMerchant(user);
-      //     if (!merchant) {
-      //       throw throwCustomError("Unable to create a merchant account", 403);
-      //     }
-      //   }
-      // if (!user.role) {
-      //   throw throwCustomError("Unable to generate an account", 404);
-      // }
+    const hashNin = await bcrypt.hash(data.nin, 5);
+    if (!hashNin) {
+      throw throwCustomError("Unable to complete request", 422);
+    }
+
+    const hashBvn = await bcrypt.hash(data.bvn, 5);
+    if (!hashBvn) {
+      throw throwCustomError("Unable to complete request", 422);
     }
 
     //call external API
     const isUser = kycRecords.find(
       (item) =>
-        item.firstName === user.firstName && item.lastName === user.lastName
+        item.firstName.toLowerCase() === data.firstName &&
+        item.lastName.toLowerCase() === data.lastName
     );
     if (!isUser) {
       throw throwCustomError("No record found", 403);
     }
     //check dateofbirth
     const isDob = kycRecords.find(
-      (result) => result.dateOfBirth === dateOfBirth
+      (x) =>
+        x.dateOfBirth === data.dateOfBirth &&
+        x.firstName.toLowerCase() === data.firstName &&
+        x.lastName.toLowerCase() === data.lastName
     );
     if (!isDob) {
       throw throwCustomError("Invalid credentials", 403);
@@ -361,19 +346,19 @@ export class UserService {
     //check NIN authentication
     const isNinValid = kycRecords.find(
       (result) =>
-        result.nin === nin &&
-        result.firstName === user.firstName &&
-        result.lastName === user.lastName
+        result.nin === data.nin &&
+        result.firstName.toLowerCase() === data.firstName &&
+        result.lastName.toLowerCase() === data.lastName
     );
     if (!isNinValid) {
-      throw throwCustomError("Invalid NIN", 402);
+      throw throwCustomError("Invalid NIN", 403);
     }
     //check BVN authentication
     const isBvnValid = kycRecords.find(
       (result) =>
-        result.bvn === bvn &&
-        result.firstName === user.firstName &&
-        result.lastName === user.lastName
+        result.bvn === data.bvn &&
+        result.firstName.toLowerCase() === data.firstName &&
+        result.lastName.toLowerCase() === data.lastName
     );
     if (!isBvnValid) {
       throw throwCustomError("Invalid BVN", 402);
@@ -384,8 +369,8 @@ export class UserService {
       firstName,
       lastName,
       dateOfBirth,
-      nin,
-      bvn,
+      nin: hashNin,
+      bvn: hashBvn,
       userId,
     });
 
@@ -394,32 +379,4 @@ export class UserService {
     }
     return `Your ${user.role} account has been Verified`;
   }
-
-  //   static async upgardeRole(userId: Types.ObjectId, role: string) {
-  //     const response = await UserRepository.findUserById(userId);
-
-  //     if (response) {
-  //       if (response.role === "customer") {
-  //         const customer = await CustomerRepository.createCustomer(response.id);
-  //         if (!customer) {
-  //           throw throwCustomError("Unable to create a customer account", 403);
-  //         }
-  //       }
-  //       if (response.role === "merchant") {
-  //         const merchant = await MerchantRepository.createMerchant(response.id);
-  //         if (!merchant) {
-  //           throw throwCustomError("Unable to create a merchant account", 403);
-  //         }
-  //       }
-  //     }
-  //     if (!response) {
-  //       throw throwCustomError("No User found", 404);
-  //     }
-
-  //     const res = await UserRepository.upgradeRole(userId, role);
-  //     if (!res) {
-  //       throw throwCustomError("Ubable to upgrade account", 405);
-  //     }
-  //     return `You've been upgraded to ${role}`;
-  //   }
 }
