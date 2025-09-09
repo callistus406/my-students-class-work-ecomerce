@@ -130,7 +130,7 @@ export class UserService {
     sendMail(
       {
         email: email,
-        subject: "OTP VERIFICATION",
+        subject: "REQUEST OTP VERIFICATION",
         emailInfo: {
           otp: otp.toString(),
           name: `${user.firstName} ${user.lastName}`,
@@ -153,11 +153,15 @@ export class UserService {
     const otp = await UserService.generateOtp(email);
     console.log("do not share with anyone", otp);
     if (!otp) throw throwCustomError("Unable to generate OTP", 500);
+
+    const hashedotp = await bcrypt.hash(otp.toString(), 2);
+    console.log(hashedotp);
+    if (!hashedotp) throw throwCustomError("OTP hashing failed", 500);
     // send otp via mail
     sendMail(
       {
         email: email,
-        subject: "OTP VERIFICATION",
+        subject: "REQUEST PASSWORD RESET",
         emailInfo: {
           otp: otp.toString(),
           name: `${user.firstName} ${user.lastName}`,
@@ -181,7 +185,8 @@ export class UserService {
     if (!isOtpValid) {
       throw throwCustomError("Invalid OTP", 400);
     }
-
+    
+    // hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     if (!hashedPassword) {
       throw throwCustomError("Password hashing failed", 500);
