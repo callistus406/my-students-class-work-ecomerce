@@ -1,4 +1,8 @@
-export const otpTemplate = (data:{name: string, otp: string, message:string}) => {
+export const otpTemplate = (data: {
+  name: string;
+  otp: string;
+  message: string;
+}) => {
   return `
     <html>
       <head>

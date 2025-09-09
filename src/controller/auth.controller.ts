@@ -1,9 +1,15 @@
 import { Request, Response } from "express";
 import { IVerifyUser } from "../interface/user.interface";
-import { UserService } from "../services/auth.services";
+import { UserService } from "../services/user.services";
+import { asyncWrapper } from "../midddleware/asyncWrapper";
+import { IRequest } from "../midddleware/auth.middleware";
 
-export class AppController {
+export class AuthController {
   static preRegister = async (req: Request, res: Response) => {
+    req.body.email = req.body.email.toLowerCase();
+    req.body.firstName = req.body.firstName.toLowerCase();
+    req.body.lastName = req.body.lastName.toLowerCase();
+    req.body.role = req.body.role.toLowerCase();
     try {
       const user = req.body;
       const response = await UserService.preRegister(user);
@@ -19,6 +25,8 @@ export class AppController {
   };
 
   static registration = async (req: Request, res: Response) => {
+    req.body.email = req.body.email.toLowerCase();
+
     try {
       const user = req.body as IVerifyUser;
       const response = await UserService.Register(user);
@@ -32,6 +40,8 @@ export class AppController {
   };
 
   static requestOtp = async (req: Request, res: Response) => {
+    req.body.email = req.body.email.toLowerCase();
+
     try {
       const email = req.body.email;
       const response = await UserService.requestOtp(email);
@@ -47,6 +57,8 @@ export class AppController {
   };
 
   static requestPasswordReset = async (req: Request, res: Response) => {
+    req.body.email = req.body.email.toLowerCase();
+
     try {
       const email = req.body.email;
       const response = await UserService.requestPasswordReset(email);
@@ -62,6 +74,8 @@ export class AppController {
   };
 
   static resetPassword = async (req: Request, res: Response) => {
+    req.body.email = req.body.email.toLowerCase();
+
     try {
       const { email, otp, newPassword } = req.body;
       const response = await UserService.resetPassword(email, otp, newPassword);
@@ -91,19 +105,41 @@ export class AppController {
     }
   };
 
-  static login = async (req: Request, res: Response) => {
-    try {
-      const { email, password } = req.body;
-      const response = await UserService.login(email, password);
-      res.status(200).json({
-        message: "Success",
-        data: response,
-      });
-    } catch (error: any) {
-      res.status(400).json({
-        message: "Bad Request",
-        data: error.message,
-      });
-    }
-  };
+  static login = asyncWrapper(async (req: Request, res: Response) => {
+    req.body.email = req.body.email.toLowerCase();
+
+    const { email, password } = req.body;
+    const ipAddress = req.ip as string;
+    const userAgent = req.headers["user-agent"] as string;
+    const response = await UserService.login(
+      email,
+      password,
+      ipAddress,
+      userAgent
+    );
+    res.status(200).json({
+      success: true,
+      payload: response,
+    });
+  });
+
+  // ==================|| KYC VERIFICATION ||==============================================
+  static verifyKyc = asyncWrapper(async (req: IRequest, res: Response) => {
+    req.body.firstName = req.body.firstName.toLowerCase();
+    req.body.lastName = req.body.lastName.toLowerCase();
+
+    const { firstName, lastName, dateOfBirth, bvn, nin } = req.body;
+
+    const userId = req.user.id;
+
+    const response = await UserService.verifyKyc({
+      firstName,
+      lastName,
+      dateOfBirth,
+      bvn,
+      nin,
+      userId,
+    });
+    res.status(200).json({ success: true, payload: response });
+  });
 }

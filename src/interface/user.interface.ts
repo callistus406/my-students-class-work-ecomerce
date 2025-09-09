@@ -3,14 +3,14 @@ export interface IPreRegister {
   lastName: string;
   email: string;
   password: string;
-  role: "merchant" | "customer";
-   is_Varified: false;
+  role: string;
+  is_verified: boolean;
 }
 
 export interface IVerifyUser {
   email: string;
   otp: string;
-   is_Varified: true;
+  is_verified: true;
 }
 
 // Step: provide basic information

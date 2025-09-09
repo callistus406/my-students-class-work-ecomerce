@@ -3,6 +3,8 @@ import { Types } from "mongoose";
 import { userModel } from "../models/user.model";
 import { otpModel } from "../models/otp.model";
 import { IPreRegister } from "../interface/user.interface";
+import { throwCustomError } from "../midddleware/errorHandler.midleware";
+import { customerModel } from "../models/customer.model";
 
 export class UserRepository {
   static createUser = async (user: IPreRegister) => {
@@ -62,6 +64,13 @@ export class UserRepository {
     return user;
   };
 
+  static async findUserById(userId: Types.ObjectId) {
+    const response = await userModel.findById({ _id: userId });
+    if (!Types.ObjectId.isValid(userId)) {
+      throw throwCustomError("Invalid User ID", 406);
+    }
+    return response;
+  }
   static saveOtp = async (email: string, otp: string) => {
     const res = await otpModel.findOneAndUpdate(
       {
@@ -79,7 +88,6 @@ export class UserRepository {
 
     return res;
   };
-
   static getOtp = async (email: string) => {
     const response = await otpModel.findOne({ email });
     if (!response) return null;
@@ -93,7 +101,7 @@ export class UserRepository {
       { new: true, upsert: true }
     );
     return response;
-  }
+  };
 
   static resetPassword = async (
     email: string,
@@ -104,8 +112,57 @@ export class UserRepository {
     const response = await userModel.findOneAndUpdate(
       { email },
       { password: newPassword, is_verified },
-      { otp, createdAt: new Date(), new: true, upsert: true },
+      { otp, createdAt: new Date(), new: true, upsert: true }
     );
     return response;
   };
+
+  static async login(email: string, password: string): Promise<any> {
+    const user = await userModel.findOne({ email, password });
+    return user;
+  }
+  //============================||VERIFY KYC ||=============================
+
+  static async saveKyc(data: {
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string;
+    nin: string;
+    bvn: string;
+    userId: Types.ObjectId;
+  }) {
+    const response = await userModel.findByIdAndUpdate(
+      data.userId,
+      {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        dateOfBirth: data.dateOfBirth,
+        nin: data.nin,
+        bvn: data.bvn,
+        is_verified: true,
+      },
+      { new: true }
+    );
+    if (!response) return null;
+    return response;
+  }
+
+  static async deleteRole(userId: Types.ObjectId) {
+    const record = await customerModel.findByIdAndDelete({ __id: userId });
+    if (!record) return null;
+    return record;
+  }
+
+  //====================|| UPGRADE TO CUSTOMER OR MERCHANT ||==================
+  static async upgradeRole(userId: Types.ObjectId, role: string): Promise<any> {
+    const response = await userModel.findByIdAndUpdate(
+      userId,
+      { role },
+      {
+        new: true,
+      }
+    );
+    if (!response) return null;
+    return response;
+  }
 }

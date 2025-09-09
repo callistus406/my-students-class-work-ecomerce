@@ -1,16 +1,18 @@
 import express from "express";
 
 import { authMiddleware } from "../midddleware/auth.middleware";
-import { AppController } from "../controller/auth.controller";
+import { AuthController } from "../controller/auth.controller";
 
 const router = express.Router();
 
-router.post("/preregister", AppController.preRegister);
-router.post("/register", AppController.registration);
-router.get("/getuser", AppController.getUser);
-router.get("/login", AppController.login);
-router.post("/request-otp", AppController.requestOtp);
-router.post("/request-password-reset", AppController.requestPasswordReset);
-router.post("/reset-password", AppController.resetPassword);
+router.post("/pre-register", AuthController.preRegister);
+router.post("/register", AuthController.registration);
+router.get("/get-user", authMiddleware as any, AuthController.getUser);
+router.get("/login", AuthController.login);
+router.post("/upgrade-kyc", authMiddleware as any, AuthController.verifyKyc);
+
+router.post("/request-otp", AuthController.requestOtp);
+router.post("/request-password-reset", AuthController.requestPasswordReset);
+router.post("/reset-password", AuthController.resetPassword);
 
 export default router;
