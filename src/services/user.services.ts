@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { otpModel } from "../models/otp.model";
+import {JWT_SECRET,JWT_EXP,JWT_ADMIN_KEY} from "../config/system.variable";
 import { UserRepository } from "../repository/user.repository";
 import {
   loginValidate,
@@ -259,10 +260,7 @@ export class UserService {
       userId: user._id,
     };
 
-    const jwtSecret = process.env.JWT_ADMIN_KEY as string;
-    const jwtExpire = process.env.JWT_EXP;
-
-    let jwtKey = jwt.sign(payload, jwtSecret, { expiresIn: jwtExpire } as any);
+    let jwtKey = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXP } as any);
     if (!jwtKey) {
       throw throwCustomError("Unable to Login", 500);
     }
