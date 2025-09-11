@@ -1,13 +1,29 @@
-import { Inventory } from "../models/invent.model";
+import { InventoryModel } from "../models/invent.model";
 import { IProduct } from "../interface/product.interface";
 import { productModel } from "../models/product.model";
+import { Types } from "mongoose";
 
-export class InventController {
+export class inventRepository {
     static createInventory = async (data:{quantity:number, location:string}) => {
-         const response = (await Inventory.create(data));
+         const response = await InventoryModel.create(data);
          if (!response) return null;
          return response;
     }
+
+    static getinventory = async () => {
+        const response = await InventoryModel.find()
+        return response
+    }
+
+    static findById = async (id: Types.ObjectId) => {
+        const res = InventoryModel.findById(id).select("-__v");
+        if(!res) return null;
+        return res;
+    }
+
+
+
+
     // product creations
     static createProduct = async (data: IProduct) => {
         const response = await productModel.create(data);

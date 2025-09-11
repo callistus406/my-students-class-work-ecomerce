@@ -17,6 +17,8 @@ router.post("/reset-password", AuthController.resetPassword);
 
 // inventory route section
 router.post("/inventory",InventController.createInventory);
+router.get("/inventory/all",InventController.getinventory);
+router.get("/inventory/:id", InventController.findById as any);
 router.post("/product",InventController.createProduct);
 router.delete("/product/:id",InventController.deleteProduct);
 
