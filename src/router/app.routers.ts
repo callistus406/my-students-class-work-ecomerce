@@ -1,8 +1,7 @@
 import express from "express";
-
 import { authMiddleware } from "../midddleware/auth.middleware";
 import { AuthController } from "../controller/auth.controller";
-import {InventController} from "../controller/invent.controller";
+import {appController} from "../controller/product.controller";
 
 const router = express.Router();
 
@@ -16,10 +15,12 @@ router.post("/request-password-reset", AuthController.requestPasswordReset);
 router.post("/reset-password", AuthController.resetPassword);
 
 // inventory route section
-router.post("/inventory",InventController.createInventory);
-router.get("/inventory/all",InventController.getinventory);
-router.get("/inventory/:id", InventController.findById as any);
-router.post("/product",InventController.createProduct);
-router.delete("/product/:id",InventController.deleteProduct);
+router.post("/create-inventory",appController.createInventory);
+router.get("/inventories",appController.getinventory);
+router.get("/inventory/:id", appController.findById as any);
+router.post("/create-product",appController.createProduct);
+router.get("/products", appController.getproduct as any)
+router.delete("/product/:id",appController.deleteProduct);
+router.get("/search-product", appController.findProductByName)
 
 export default router;

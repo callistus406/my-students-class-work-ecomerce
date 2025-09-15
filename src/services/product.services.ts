@@ -1,16 +1,16 @@
-import { inventRepository } from "../repository/inventory.repository";
+import { productRepository } from "../repository/product.repository";
 import { Types } from "mongoose";
 import { IInventory } from "../interface/intentory.interface";
 import { IProduct } from "../interface/product.interface";
 import { throwCustomError } from "../midddleware/errorHandler.midleware";
 import { productValidate } from "../validation/product.validate";
-export class InventoryService {
+export class productService {
   static createInventory = async (data: IInventory) => {
     if (!data || !data.quantity || !data.location) {
       throw throwCustomError("All fields are required1", 400);
     }
 
-    const response = await inventRepository.createInventory(data);
+    const response = await productRepository.createInventory(data);
 
     if (!response) {
       throw throwCustomError("Inventory not created1", 500);
@@ -20,7 +20,7 @@ export class InventoryService {
   };
 
   static getinventory = async () => {
-    const response = await inventRepository.getinventory();
+    const response = await productRepository.getinventory();
     return response;
   };
 
@@ -28,7 +28,7 @@ export class InventoryService {
     if (!id) {
       throw throwCustomError("id is required", 400);
     }
-    const response = await inventRepository.findById(id);
+    const response = await productRepository.findById(id);
     return response;
   };
 
@@ -57,7 +57,7 @@ export class InventoryService {
 
     data.slug = slugs;
 
-    const response = await inventRepository.createProduct(data);
+    const response = await productRepository.createProduct(data);
 
     if (!response) {
       throw throwCustomError("Product not created", 500);
@@ -65,9 +65,28 @@ export class InventoryService {
 
     return "Product created successfully";
   };
+
+  // get product
+  static getProducts = async (
+    filter: {
+      page: string;
+      limit: string;
+      // search: string;
+    },
+  ) => {
+     const page = parseInt(filter.page) || 1;
+    const limit = parseInt(filter.limit) || 10;
+
+    const response = await productRepository.getProducts( 
+      page,
+      limit)
+
+      return response;
+  };
+
   // update product service
   static updateProduct = async (id: string) => {
-    const response = await inventRepository.updateProduct(id);
+    const response = await productRepository.updateProduct(id);
     if (!response) {
       throw throwCustomError("Product not found", 404);
     }
@@ -76,10 +95,21 @@ export class InventoryService {
 
   // delete product service
   static deleteProduct = async (id: string) => {
-    const response = await inventRepository.findanddelete(id);
+    const response = await productRepository.findanddelete(id);
     if (!response) {
       throw throwCustomError("Product not found", 404);
     }
     return "Product deleted successfully";
   };
+
+  static findProductByName = async (productName:string) =>{
+    if(!productName){
+      throw throwCustomError("Provide Product Name", 400)
+    }
+    const response =await productRepository.findProductByName(productName);
+    if(!response){
+      throw throwCustomError("product not find",500)
+    }
+    return response;
+  }
 }

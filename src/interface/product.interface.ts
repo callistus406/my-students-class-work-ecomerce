@@ -18,3 +18,12 @@ export interface IProduct {
   isActive?: boolean;
   avgRating?: number;
 }
+
+export interface IRequest extends Request {
+  user: {
+    id: Types.ObjectId;
+    firstName?: string | null;
+    email?: string | null;
+    kycStatus?: string;
+  };
+}
