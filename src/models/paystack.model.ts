@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
-export const payoutSchema = new Schema({
-  merchantId: { type: Schema.Types.ObjectId, ref: "Merchant", require: true },
+const paystackSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: "User", require: true },
   orderId: { type: Schema.Types.ObjectId, ref: "Order", require: true },
   periodStart: { type: String, require: true },
   periodEnd: { type: String, require: true },
@@ -20,9 +20,9 @@ export const payoutSchema = new Schema({
     require: true,
     enum: ["mock", "paypal", "flutterwave", "stripe"],
   },
-  settleRef: { type: String, require: true },
+  reference: { type: String },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
 
-const payoutModel = mongoose.model("Payout", payoutSchema);
+export const payoutModel = mongoose.model("Paystack", paystackSchema);

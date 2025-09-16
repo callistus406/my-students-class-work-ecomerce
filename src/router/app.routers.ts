@@ -2,6 +2,7 @@ import express from "express";
 
 import { authMiddleware } from "../midddleware/auth.middleware";
 import { AuthController } from "../controller/auth.controller";
+import { PaystackController } from "../controller/auth.paystack";
 
 const router = express.Router();
 
@@ -14,5 +15,11 @@ router.post("/upgrade-kyc", authMiddleware as any, AuthController.verifyKyc);
 router.post("/request-otp", AuthController.requestOtp);
 router.post("/request-password-reset", AuthController.requestPasswordReset);
 router.post("/reset-password", AuthController.resetPassword);
+router.post("/initiate-payment", PaystackController.initiatePayment);
+router.get("/verify-payment/:reference", PaystackController.verifyPayment);
+router.post(
+  "/paystack/callback",
+  PaystackController.handleCallback.bind(PaystackController)
+);
 
 export default router;
