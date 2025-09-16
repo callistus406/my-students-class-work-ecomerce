@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { otpModel } from "../models/otp.model";
+import {JWT_SECRET,JWT_EXP,JWT_ADMIN_KEY} from "../config/system.variable";
 import { UserRepository } from "../repository/user.repository";
 import {
   loginValidate,
@@ -151,7 +152,7 @@ export class UserService {
     sendMail(
       {
         email: email,
-        subject: "OTP VERIFICATION",
+        subject: "REQUEST OTP VERIFICATION",
         emailInfo: {
           otp: otp.toString(),
           name: `${user.firstName} ${user.lastName}`,
@@ -173,11 +174,15 @@ export class UserService {
     const otp = await UserService.generateOtp(email);
     console.log("do not share with anyone", otp);
     if (!otp) throw throwCustomError("Unable to generate OTP", 500);
+
+    const hashedotp = await bcrypt.hash(otp.toString(), 2);
+    console.log(hashedotp);
+    if (!hashedotp) throw throwCustomError("OTP hashing failed", 500);
     // send otp via mail
     sendMail(
       {
         email: email,
-        subject: "OTP VERIFICATION",
+        subject: "REQUEST PASSWORD RESET",
         emailInfo: {
           otp: otp.toString(),
           name: `${user.firstName} ${user.lastName}`,
@@ -204,7 +209,8 @@ export class UserService {
     if (!isOtpValid) {
       throw throwCustomError("Invalid OTP", 400);
     }
-
+    
+    // hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     if (!hashedPassword) {
       throw throwCustomError("Password hashing failed", 500);
@@ -254,10 +260,7 @@ export class UserService {
       userId: user._id,
     };
 
-    const jwtSecret = process.env.JWT_ADMIN_KEY as string;
-    const jwtExpire = process.env.JWT_EXP;
-
-    let jwtKey = jwt.sign(payload, jwtSecret, { expiresIn: jwtExpire } as any);
+    let jwtKey = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXP } as any);
     if (!jwtKey) {
       throw throwCustomError("Unable to Login", 500);
     }
