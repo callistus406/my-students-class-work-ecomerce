@@ -3,6 +3,7 @@ import { authMiddleware } from "../midddleware/auth.middleware";
 import { AuthController } from "../controller/auth.controller";
 import { PaystackController } from "../controller/auth.paystack";
 import { appController } from "../controller/product.controller";
+import { cartController } from "../controller/cart.controller";
 
 const router = express.Router();
 
@@ -29,5 +30,9 @@ router.post("/create-product", appController.createProduct);
 router.get("/products", appController.getproduct as any);
 router.delete("/product/:id", appController.deleteProduct);
 router.get("/search-product", appController.findProductByName);
+
+// cart routes
+router.post("/create-cart", cartController.createCart);
+//router.post("/add-item-to-cart", appController.addItemToCart);
 
 export default router;
