@@ -33,6 +33,7 @@ router.get("/search-product", appController.findProductByName);
 
 // cart routes
 router.post("/create-cart", cartController.createCart);
-//router.post("/add-item-to-cart", appController.addItemToCart);
+router.patch("/DeleteFromCart/:userId/:productId", cartController.removeItemFromCart);
+router.post("/update-cart/:userId", cartController.updateCart);
 
 export default router;

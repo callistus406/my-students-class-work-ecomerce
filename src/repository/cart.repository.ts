@@ -8,41 +8,62 @@ export class cartRepository {
     return response;
   };
 
- static async addItemToCart(userId: Types.ObjectId, newItem: CartItem) {
-  const cart = await cartModel.findOne({ userId });
+  static async addItemToCart(userId: Types.ObjectId, newItem: CartItem) {
+    const cart = await cartModel.findOne({ userId });
 
-  if (!cart) {
-    const totalPrice = newItem.unitPrice * newItem.quantity;
+    if (!cart) {
+      const totalPrice = newItem.unitPrice * newItem.quantity;
 
-    return await cartModel.create({
-      userId,
-      items: [newItem],
-      currency: "NIG",
-      totalPrice,
-    });
-  }
+      return await cartModel.create({
+        userId,
+        items: [newItem],
+        currency: "NIG",
+        totalPrice,
+      });
+    }
 
-  // Find existing item safely
-  const existingItem = cart.items.find(
-    (item) =>
-      item.productId &&
-      item.productId.toString() === newItem.productId.toString()
-  );
+    // Find existing item safely
+    const existingItem = cart.items.find(
+      (item) =>
+        item.productId &&
+        item.productId.toString() === newItem.productId.toString()
+    );
 
- if (existingItem) {
-  existingItem.quantity = (existingItem.quantity ?? 0) + (newItem.quantity ?? 0);
-} else {
-  cart.items.push(newItem);
-}
+    if (existingItem) {
+      existingItem.quantity =
+        (existingItem.quantity ?? 0) + (newItem.quantity ?? 0);
+    } else {
+      cart.items.push(newItem);
+    }
 
     // Recalculate total price
-  cart.totalPrice = cart.items.reduce((sum, item) => {
-    const unit = item.unitPrice ?? 0;
-    const qty = item.quantity ?? 0;
-    return sum + unit * qty;
-  }, 0);
+    cart.totalPrice = cart.items.reduce((sum, item) => {
+      const unit = item.unitPrice ?? 0;
+      const qty = item.quantity ?? 0;
+      return sum + unit * qty;
+    }, 0);
 
-  await cart.save();
-  return cart;
-}   
+    await cart.save();
+    return cart;
+  }
+
+  static async removeItemFromCart(
+    userId: Types.ObjectId,
+    productId: Types.ObjectId
+  ) {
+    const cart = await cartModel.findOneAndUpdate(
+      { userId: userId },
+      { $pull: { products: { productId: productId } } },
+    );
+    return cart;
+  }
+
+  static updateCart = async (userId: Types.ObjectId, data: Partial<Cart>) => {
+    const cart = await cartModel.findOneAndUpdate({ userId }, data, {
+      new: true,
+    });
+    return cart;
+  }
+ 
+
 }
