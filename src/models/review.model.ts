@@ -1,4 +1,4 @@
-import mongoose, {Schema} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 export const reviewSchema = new Schema({
   id: { type: Schema.Types.ObjectId, require: true, unique: true },

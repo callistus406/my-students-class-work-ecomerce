@@ -6,8 +6,7 @@ import { userModel } from "../models/user.model";
 export interface IRequest extends Request {
   user: {
     id: Types.ObjectId;
-    firstName?: string | null;
-    email?: string | null;
+    email: string;
     is_verified?: boolean;
   };
 }
@@ -32,8 +31,7 @@ export const authMiddleware = (
 
     if (!user) return res.sendStatus(401);
     req.user = {
-      firstName: user?.firstName,
-      email: user?.email,
+      email: user.email as string,
       id: user._id,
       is_verified: user.is_verified,
     };

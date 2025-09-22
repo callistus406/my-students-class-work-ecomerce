@@ -1,10 +1,14 @@
 import { Request, Response } from "express";
 import { PaystackService } from "../services/paystack.service";
+import { IRequest } from "../midddleware/auth.middleware";
+import { UserRepository } from "../repository/user.repository";
 
 export class PaystackController {
-  static async initiatePayment(req: Request, res: Response) {
+  static async initiatePayment(req: IRequest, res: Response) {
     try {
-      const { amount, email } = req.body;
+      const email = req.user.email;
+
+      const amount = req.body.amount;
       const response = await PaystackService.initiatePayment(amount, email);
       res.status(200).json(response);
     } catch (error: any) {

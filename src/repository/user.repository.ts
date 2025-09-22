@@ -54,8 +54,11 @@ export class UserRepository {
     return user;
   };
 
-  static getUsers = async () => {
-    const users = await userModel.find().select("-password,-__v");
+  static getUser = async (userId: Types.ObjectId) => {
+    const users = await userModel
+      .findOne({ _id: userId })
+      .select("-password,-__v")
+      .lean();
     return users;
   };
 
