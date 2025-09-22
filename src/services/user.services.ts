@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { otpModel } from "../models/otp.model";
-import {JWT_SECRET,JWT_EXP,JWT_ADMIN_KEY} from "../config/system.variable";
+import { JWT_SECRET, JWT_EXP, JWT_ADMIN_KEY } from "../config/system.variable";
 import { UserRepository } from "../repository/user.repository";
 import {
   loginValidate,
@@ -209,7 +209,7 @@ export class UserService {
     if (!isOtpValid) {
       throw throwCustomError("Invalid OTP", 400);
     }
-    
+
     // hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     if (!hashedPassword) {
@@ -227,8 +227,8 @@ export class UserService {
     return "Password reset successfully";
   };
 
-  static getUser = async () => {
-    return await UserRepository.getUsers();
+  static getUser = async (userId: Types.ObjectId) => {
+    return await UserRepository.getUser(userId);
   };
 
   static login = async (

@@ -1,25 +1,10 @@
-import { InventoryModel } from "../models/invent.model";
 import { IProduct } from "../interface/product.interface";
 import { productModel } from "../models/product.model";
 import { Types } from "mongoose";
 
 export class productRepository {
-  static createInventory = async (data: {
-    quantity: number;
-    location: string;
-  }) => {
-    const response = await InventoryModel.create(data);
-    if (!response) return null;
-    return response;
-  };
-
-  static getinventory = async () => {
-    const response = await InventoryModel.find();
-    return response;
-  };
-
   static findById = async (id: Types.ObjectId) => {
-    const res = InventoryModel.findById(id).select("-__v");
+    const res = productModel.findById(id).lean();
     if (!res) return null;
     return res;
   };
@@ -32,13 +17,12 @@ export class productRepository {
   };
 
   // get product
-  static getProducts = async (
-    page: number,
-    limit: number,
-  ) => {
+  static getProducts = async (page: number, limit: number) => {
     const skip = (page - 1) * limit;
 
-    const response = await InventoryModel.find().lean()
+    const response = await productModel
+      .find()
+      .lean()
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
@@ -57,22 +41,29 @@ export class productRepository {
       },
     };
   };
+
   // update product by id
-  static updateProduct = async (id: string) => {
-    const response = await productModel.findByIdAndUpdate(id, { new: true }).select("-__v");
+  static updateProduct = async (id: Types.ObjectId) => {
+    const response = await productModel
+      .findByIdAndUpdate(id, {}, { new: true })
+      .lean();
+
     if (!response) return null;
     return response;
   };
   // find and delete product by id
-  static findanddelete = async (id: string) => {
-    const response = await productModel.findByIdAndDelete(id).select("-__v");
+  static findAndDelete = async (id: string): Promise<any> => {
+    const response = await productModel.findByIdAndDelete(id).lean();
     if (!response) return null;
     return response;
   };
 
-   static findProductByName = async (productName:string) =>{
-    const response = await productModel.findOne({productName}).select("-__v");
-    return response
-   }
-
+  static findProductByName = async (productName: string) => {
+    const response = await productModel.findOne({ productName }).lean();
+    return response;
+  };
+  static findProductBySlug = async (slug: string) => {
+    const response = await productModel.findOne({ slug }).lean();
+    return response;
+  };
 }

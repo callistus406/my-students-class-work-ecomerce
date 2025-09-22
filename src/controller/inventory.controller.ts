@@ -1,29 +1,19 @@
-import {productService} from "../services/product.services";
+import { productService } from "../services/product.services";
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 
-export class appController {
-  static createInventory = async (req: Request, res: Response) => {
+export class InventoryController {
+  // product creation controller
+  static createProduct = async (req: Request, res: Response) => {
     try {
-      const data = req.body;
-      const response = await productService.createInventory(data);
+      const data = req.body.data;
+      const response = await productService.createProduct(data);
       res.status(200).json({ success: true, payload: response });
     } catch (error: any) {
+      console.log(error);
       res.status(400).json({
         success: false,
         message: error.message || "Something went wrong",
-      });
-    }
-  };
-
-  static getinventory = async (req: Request, res: Response) => {
-    try {
-      const item = await productService.getinventory();
-      res.status(200).json({ success: true, payload: item });
-    } catch (error: any) {
-      res.status(400).json({
-        success: false,
-        message: error.message,
       });
     }
   };
@@ -54,33 +44,13 @@ export class appController {
     }
   };
 
-  // product creation controller
-  static createProduct = async (req: Request, res: Response) => {
-    try {
-      const data = req.body.data;
-      const response = await productService.createProduct(data);
-      res.status(200).json({ success: true, payload: response });
-    } catch (error: any) {
-      console.log(error);
-      res.status(400).json({
-        success: false,
-        message: error.message || "Something went wrong",
-      });
-    }
-  };
-
   // get product
   static getproduct = async (req: Request, res: Response) => {
     try {
-      const {
-        page,
-        limit,
-       
-      } = req.query as {
+      const { page, limit } = req.query as {
         page: string;
         limit: string;
       };
-
 
       const response = await productService.getProducts({ page, limit });
 
@@ -124,20 +94,4 @@ export class appController {
       });
     }
   };
-
-  static findProductByName = async (req:Request, res:Response) =>{
-    try {
-      const {productName} = req.body;
-      const response = await productService.findProductByName(productName);
-      res.status(200).json({success:true, payload:response})
-      
-    } catch (error:any) {
-      res.status(400).json({
-        success:false,
-        message:error.message,
-      })
-      
-    }
-  }
-
 }
