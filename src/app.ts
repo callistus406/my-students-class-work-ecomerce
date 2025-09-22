@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
 import router from "./router/app.routers";
-import {PORT} from "./config/system.variable"
+import { PORT } from "./config/system.variable";
 import { mongoConnection } from "./config/db.connections";
 import { handleCustomError } from "./midddleware/errorHandler.midleware";
 

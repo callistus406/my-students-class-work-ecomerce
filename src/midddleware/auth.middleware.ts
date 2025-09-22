@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { Types } from "mongoose";
 import { userModel } from "../models/user.model";
+import { JWT_SECRET } from "../config/system.variable";
 
 export interface IRequest extends Request {
   user: {
@@ -18,11 +19,10 @@ export const authMiddleware = (
   next: NextFunction
 ): any => {
   const authHeader = req.headers.authorization;
-  const jwtSecret = process.env.JWT_ADMIN_KEY as string;
   const token = authHeader?.split("Bearer ")[1];
   if (!token) return res.sendStatus(401);
 
-  jwt.verify(token, jwtSecret, async (err, data: any) => {
+  jwt.verify(token, JWT_SECRET, async (err, data: any) => {
     if (err) {
       return res.sendStatus(401);
     }

@@ -4,6 +4,7 @@ import { IInventory } from "../interface/intentory.interface";
 import { IProduct } from "../interface/product.interface";
 import { throwCustomError } from "../midddleware/errorHandler.midleware";
 import { productValidate } from "../validation/product.validate";
+import { reviewModel } from "../models/review.model";
 export class productService {
   static createInventory = async (data: IInventory) => {
     if (!data || !data.quantity || !data.location) {
@@ -67,21 +68,17 @@ export class productService {
   };
 
   // get product
-  static getProducts = async (
-    filter: {
-      page: string;
-      limit: string;
-      // search: string;
-    },
-  ) => {
-     const page = parseInt(filter.page) || 1;
+  static getProducts = async (filter: {
+    page: string;
+    limit: string;
+    // search: string;
+  }) => {
+    const page = parseInt(filter.page) || 1;
     const limit = parseInt(filter.limit) || 10;
 
-    const response = await productRepository.getProducts( 
-      page,
-      limit)
+    const response = await productRepository.getProducts(page, limit);
 
-      return response;
+    return response;
   };
 
   // update product service
@@ -102,14 +99,38 @@ export class productService {
     return "Product deleted successfully";
   };
 
-  static findProductByName = async (productName:string) =>{
-    if(!productName){
-      throw throwCustomError("Provide Product Name", 400)
+  static findProductByName = async (productName: string) => {
+    if (!productName) {
+      throw throwCustomError("Provide Product Name", 400);
     }
-    const response =await productRepository.findProductByName(productName);
-    if(!response){
-      throw throwCustomError("product not find",500)
+    const response = await productRepository.findProductByName(productName);
+    if (!response) {
+      throw throwCustomError("product not find", 500);
     }
     return response;
-  }
+  };
+
+  static rateProduct = async (
+    productId: Types.ObjectId,
+    rating: number,
+    review: string
+  ) => {
+    const product = await productRepository.findProductById(productId);
+    if (!product) {
+      throw throwCustomError("No product ID found", 400);
+    }
+    product.avgRating =
+      (product.avgRating * product.ratingCount + rating) /
+      (product.ratingCount + 1);
+    product.ratingCount++;
+
+    await productRepository.save(product);
+
+    const ratingDoc = new reviewModel({ productId, rating, review });
+    const response = await productRepository.createRating(ratingDoc);
+    if (!response) {
+      throw throwCustomError("Unavle to leave a review", 400);
+    }
+    return response;
+  };
 }

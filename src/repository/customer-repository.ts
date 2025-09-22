@@ -2,6 +2,9 @@ import { Types } from "mongoose";
 import { ICreateCustomer } from "../interface/customer-interface";
 import { customerModel } from "../models/customer.model";
 import { payoutModel } from "../models/paystack.model";
+import { reviewModel } from "../models/review.model";
+import { IReview } from "../interface/review.interface";
+import { userInfo } from "os";
 
 export class CustomerRepository {
   static async createCustomer(customer: ICreateCustomer) {
@@ -21,22 +24,25 @@ export class CustomerRepository {
     return response;
   }
 
-  static async getCustomerById(userid: Types.ObjectId) {
-    const res = await customerModel
-      .findById({ _id: userid })
-      .select("-password, __v,")
-      .populate({
-        path: "userId",
-        model: "User",
-      });
+  static async getCustomerById(userId: Types.ObjectId) {
+    const res = await customerModel.findById({ _id: userId }).populate({
+      path: "userId",
+      model: "User",
+    });
     if (!res) return null;
-    return res;
+    return {
+      userId: res._id,
+      email: (res.userId as any).email,
+      name: `${(res.userId as any).firstName} ${(res.userId as any).lastName}`,
+    };
   }
-  static async initializeTrans(
-    userId: Types.ObjectId,
-    data: any
-  ): Promise<any> {
-    const response = await payoutModel.findByIdAndUpdate({ userId, data });
+  static async rating(review: IReview): Promise<any> {
+    const response = await reviewModel.create({
+      productId: review.productId,
+      userId: review.userId,
+      rating: review.rating,
+      comment: review.comment,
+    });
     if (!response) return null;
     return response;
   }

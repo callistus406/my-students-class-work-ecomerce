@@ -32,13 +32,11 @@ export class productRepository {
   };
 
   // get product
-  static getProducts = async (
-    page: number,
-    limit: number,
-  ) => {
+  static getProducts = async (page: number, limit: number) => {
     const skip = (page - 1) * limit;
 
-    const response = await InventoryModel.find().lean()
+    const response = await InventoryModel.find()
+      .lean()
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
@@ -59,7 +57,9 @@ export class productRepository {
   };
   // update product by id
   static updateProduct = async (id: string) => {
-    const response = await productModel.findByIdAndUpdate(id, { new: true }).select("-__v");
+    const response = await productModel
+      .findByIdAndUpdate(id, { new: true })
+      .select("-__v");
     if (!response) return null;
     return response;
   };
@@ -70,9 +70,24 @@ export class productRepository {
     return response;
   };
 
-   static findProductByName = async (productName:string) =>{
-    const response = await productModel.findOne({productName}).select("-__v");
-    return response
-   }
+  static findProductByName = async (productName: string) => {
+    const response = await productModel.findOne({ productName }).select("-__v");
+    return response;
+  };
 
+  static findProductById = async (productId: Types.ObjectId) => {
+    const response = await productModel.findById({ productId: productId });
+    if (!response) return null;
+    return response;
+  };
+
+  static save = async (product: any) => {
+    const res = await product.save();
+    return res;
+  };
+
+  static createRating = async (rating: any) => {
+    const res = await rating.save();
+    return res;
+  };
 }

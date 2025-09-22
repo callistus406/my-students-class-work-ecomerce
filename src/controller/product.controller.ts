@@ -1,6 +1,7 @@
-import {productService} from "../services/product.services";
+import { productService } from "../services/product.services";
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+import { asyncWrapper } from "../midddleware/asyncWrapper";
 
 export class appController {
   static createInventory = async (req: Request, res: Response) => {
@@ -57,7 +58,7 @@ export class appController {
   // product creation controller
   static createProduct = async (req: Request, res: Response) => {
     try {
-      const data = req.body.data;
+      const data = req.body;
       const response = await productService.createProduct(data);
       res.status(200).json({ success: true, payload: response });
     } catch (error: any) {
@@ -72,15 +73,10 @@ export class appController {
   // get product
   static getproduct = async (req: Request, res: Response) => {
     try {
-      const {
-        page,
-        limit,
-       
-      } = req.query as {
+      const { page, limit } = req.query as {
         page: string;
         limit: string;
       };
-
 
       const response = await productService.getProducts({ page, limit });
 
@@ -125,19 +121,25 @@ export class appController {
     }
   };
 
-  static findProductByName = async (req:Request, res:Response) =>{
+  static findProductByName = async (req: Request, res: Response) => {
     try {
-      const {productName} = req.body;
+      const { productName } = req.body;
       const response = await productService.findProductByName(productName);
-      res.status(200).json({success:true, payload:response})
-      
-    } catch (error:any) {
+      res.status(200).json({ success: true, payload: response });
+    } catch (error: any) {
       res.status(400).json({
-        success:false,
-        message:error.message,
-      })
-      
+        success: false,
+        message: error.message,
+      });
     }
-  }
+  };
 
+  static rateProduct = asyncWrapper(async (req: Request, res: Response) => {
+    const productId = req.params.id;
+    const objectid = new mongoose.Types.ObjectId(productId);
+    const { rating, review } = req.body;
+
+    const response = await productService.rateProduct(objectid, rating, review);
+    res.status(200).json({ status: true, payload: response });
+  });
 }

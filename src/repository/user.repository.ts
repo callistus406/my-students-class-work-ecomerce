@@ -55,12 +55,14 @@ export class UserRepository {
   };
 
   static getUsers = async () => {
-    const users = await userModel.find().select("-password,-__v");
+    const users = await userModel
+      .find()
+      .select("-password -__v -createdAt -updatedAt -nin -bvn");
     return users;
   };
 
   static findUserByEmail = async (email: string) => {
-    const user = await userModel.findOne({ email }).select("-password,-__v");
+    const user = await userModel.findOne({ email }).select("-__v");
     return user;
   };
 
@@ -124,8 +126,6 @@ export class UserRepository {
   //============================||VERIFY KYC ||=============================
 
   static async saveKyc(data: {
-    firstName: string;
-    lastName: string;
     dateOfBirth: string;
     nin: string;
     bvn: string;
@@ -134,8 +134,6 @@ export class UserRepository {
     const response = await userModel.findByIdAndUpdate(
       data.userId,
       {
-        firstName: data.firstName,
-        lastName: data.lastName,
         dateOfBirth: data.dateOfBirth,
         nin: data.nin,
         bvn: data.bvn,
