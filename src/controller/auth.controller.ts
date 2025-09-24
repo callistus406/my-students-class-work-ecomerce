@@ -92,7 +92,8 @@ export class AuthController {
 
   static getUser = async (req: Request, res: Response) => {
     try {
-      const response = await UserService.getUser();
+      const userId = (req as IRequest).user.id;
+      const response = await UserService.getUser(userId);
       res.status(200).json({
         message: "Success",
         data: response,

@@ -2,7 +2,7 @@ import express from "express";
 import { authMiddleware } from "../midddleware/auth.middleware";
 import { AuthController } from "../controller/auth.controller";
 import { PaystackController } from "../controller/auth.paystack";
-import { appController } from "../controller/product.controller";
+import { InventoryController } from "../controller/inventory.controller";
 
 const router = express.Router();
 //authentication
@@ -23,7 +23,7 @@ router.post(
 router.post("/auth/reset-password", AuthController.resetPassword);
 
 // paystack
-router.post("/initiate-payment", PaystackController.initiatePayment);
+router.post("/initiate-payment", PaystackController.initiatePayment as any);
 router.get("/verify-payment/:reference", PaystackController.verifyPayment);
 router.post(
   "/paystack/callback",
@@ -31,12 +31,9 @@ router.post(
 );
 
 // inventory route section
-router.post("/create-inventory", appController.createInventory);
-router.get("/inventories", appController.getinventory);
-router.get("/inventory/:id", appController.findById as any);
-router.post("/create-product", appController.createProduct);
-router.get("/products", appController.getproduct as any);
-router.delete("/product/:id", appController.deleteProduct);
-router.get("/search-product", appController.findProductByName);
+router.post("/inventory/products", InventoryController.createProduct);
+router.get("/inventory/products", InventoryController.getProducts);
+router.get("/inventory/products/:id", InventoryController.findById);
+router.delete("/inventory/products/:id", InventoryController.deleteProduct);
 
 export default router;
