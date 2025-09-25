@@ -1,7 +1,7 @@
 import mongoose, { Schema, Types } from "mongoose";
 
 export const userSchema = new Schema({
-  userId: { type: Types.ObjectId },
+  //userId: { type: Types.ObjectId },
   firstName: { type: String, require: true },
   lastName: { type: String, require: true },
   email: { type: String, require: true, unique: true },
