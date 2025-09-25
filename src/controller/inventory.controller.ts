@@ -61,4 +61,18 @@ export class InventoryController {
     const response = await productService.deleteProduct(id);
     res.status(200).json({ success: true, payload: response });
   });
+
+  static ratings = asyncWrapper(async (req: IRequest, res: Response) => {
+    const productId = req.params.productId;
+    const objectId = new mongoose.Types.ObjectId(productId);
+    const userId = req.user.id;
+    const { rating, comment } = req.body;
+    const response = await productService.rating(
+      objectId,
+      userId,
+      rating,
+      comment
+    );
+    res.status(200).json({ success: true, payload: response });
+  });
 }

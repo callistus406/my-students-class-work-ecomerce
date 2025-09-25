@@ -2,7 +2,7 @@ import express from "express";
 import { authMiddleware } from "../midddleware/auth.middleware";
 import { AuthController } from "../controller/auth.controller";
 import { cartController } from "../controller/cart.controller";
-import { PaystackController } from "../controller/auth.paystack";
+import { PaystackController } from "../controller/paystack.controller";
 import { InventoryController } from "../controller/inventory.controller";
 import { CustomerController } from "../controller/customer.customer.controller";
 import { UserController } from "../controller/user.controller";
