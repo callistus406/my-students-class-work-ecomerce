@@ -20,28 +20,4 @@ export class CustomerServices {
     }
     return res;
   };
-
-  static async rating(
-    productId: Types.ObjectId,
-    userId: Types.ObjectId,
-    rating: string,
-    comment: string
-  ): Promise<any> {
-    const response = await CustomerRepository.rating({
-      productId,
-      userId,
-      rating,
-      comment,
-    });
-    if (!response) {
-      throw throwCustomError("unable to review this product", 400);
-    }
-    return {
-      productId: response.productId,
-      productName: response.productId.productName,
-      firstName: response.userId.firstName,
-      rating: rating,
-      comment: comment,
-    };
-  }
 }

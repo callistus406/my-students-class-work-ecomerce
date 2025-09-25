@@ -1,10 +1,10 @@
 import express from "express";
 import { authMiddleware } from "../midddleware/auth.middleware";
 import { AuthController } from "../controller/auth.controller";
-import { cartController } from "../controller/cart.controller";
+import { MarketplaceController } from "../controller/marketplace.controller";
 import { PaystackController } from "../controller/paystack.controller";
 import { InventoryController } from "../controller/inventory.controller";
-import { CustomerController } from "../controller/customer.customer.controller";
+import { CustomerController } from "../controller/customer.controller";
 import { UserController } from "../controller/user.controller";
 
 const router = express.Router();
@@ -45,11 +45,11 @@ router.get("/inventory/products", InventoryController.getProducts);
 router.get("/inventory/products/:id", InventoryController.findById);
 router.delete("/inventory/products/:id", InventoryController.deleteProduct);
 
-router.post("/cart/create", cartController.createCart);
+router.put("/cart", MarketplaceController.createCart as any);
 //router.post("/cart/add", cartController.addToCart);
 //router.get("/cart/:userId", cartController.getCart);
 //router.delete("/cart/remove/:userId/:productId", cartController.removeFromCart);
-router.put("/cart/update", cartController.updateCart);
+
 router.post(
   "/inventory/product/:productId/rating",
   InventoryController.ratings

@@ -23,9 +23,12 @@ export class productService {
 
     if (data.price <= 0)
       throw throwCustomError("Price must be greater than 0", 400);
-    if (data.stock < 0) throw throwCustomError("Stock cannot be negative", 400);
-    if (data.quantity < 0)
-      throw throwCustomError("Quantity cannot be negative", 400);
+
+    if (data.stock < 1)
+      throw throwCustomError("Stock should be greater or equal to 1", 400);
+    // add discount logic
+    // determine the % from the discount
+    // discount most be less than the actual price
 
     //generate slug from product name
 
@@ -47,7 +50,11 @@ export class productService {
   };
 
   // get product
-  static async getProducts(filter?: { page?: string; limit?: string; search?: string }) {
+  static async getProducts(filter?: {
+    page?: string;
+    limit?: string;
+    search?: string;
+  }) {
     let page = parseInt(filter?.page || "1", 10);
     let limit = parseInt(filter?.limit || "10", 10);
     const search = filter?.search || "";
@@ -85,6 +92,8 @@ export class productService {
     rating: string,
     comment: string
   ): Promise<any> => {
+    //TODO: validation
+
     const response = await productRepository.rating({
       productId,
       userId,
@@ -102,4 +111,10 @@ export class productService {
       comment: comment,
     };
   };
+
+  //fetch
+  //edit
+  //delete
 }
+
+// product => rating

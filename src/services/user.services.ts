@@ -34,7 +34,7 @@ export class UserService {
     // check if user exists
     const isFound = await UserRepository.findUserByEmail(user.email);
     if (isFound)
-      throw throwCustomError("Sorry, you cannnot use this email", 409);
+      throw throwCustomError("Sorry, you can not use this email", 409);
 
     // verify account state
     if (isFound && !user.is_verified)
@@ -111,7 +111,7 @@ export class UserService {
     //compare otp
     const compareOtp = await UserRepository.getOtp(user.email);
     if (!compareOtp || compareOtp.otp !== user.otp) {
-      throw throwCustomError("Invalid OTP111", 400);
+      throw throwCustomError("Invalid OTP", 400);
     }
     // verify otp
     const isOtpValid = await UserRepository.otpVerify(user.email, user.otp);
@@ -129,9 +129,6 @@ export class UserService {
 
   static async generateOtp(email: string) {
     const otp = crypto.randomInt(100000, 999999);
-    console.log("Generated OTP:", otp);
-    // save otp
-
     await otpModel.create({ email, otp });
     const savedOtp = await UserRepository.saveOtp(email, otp.toString());
     if (!savedOtp) {
@@ -169,16 +166,18 @@ export class UserService {
   //request reset password {email to send to recieve otp}
 
   static requestPasswordReset = async (email: string) => {
+    //TODO: use joi for validation
     if (!email) throw throwCustomError("Email is required", 400);
+
     const user = await UserRepository.findUserByEmail(email);
     if (!user) throw throwCustomError("User not found", 404);
 
     const otp = await UserService.generateOtp(email);
-    console.log("do not share with anyone", otp);
+
     if (!otp) throw throwCustomError("Unable to generate OTP", 500);
 
     const hashedotp = await bcrypt.hash(otp.toString(), 2);
-    console.log(hashedotp);
+
     if (!hashedotp) throw throwCustomError("OTP hashing failed", 500);
     // send otp via mail
     sendMail(
@@ -429,3 +428,6 @@ export class UserService {
     return response;
   };
 }
+
+
+symetric en
