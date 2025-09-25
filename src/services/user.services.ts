@@ -228,8 +228,8 @@ export class UserService {
     return "Password reset successfully";
   };
 
-  static getUser = async () => {
-    return await UserRepository.getUsers();
+  static getUser = async (userId: Types.ObjectId) => {
+    return await UserRepository.getUser(userId);
   };
 
   static login = async (

@@ -3,28 +3,18 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { asyncWrapper } from "../midddleware/asyncWrapper";
 
-export class appController {
-  static createInventory = async (req: Request, res: Response) => {
+export class InventoryController {
+  // product creation controller
+  static createProduct = async (req: Request, res: Response) => {
     try {
-      const data = req.body;
-      const response = await productService.createInventory(data);
+      const data = req.body.data;
+      const response = await productService.createProduct(data);
       res.status(200).json({ success: true, payload: response });
     } catch (error: any) {
+      console.log(error);
       res.status(400).json({
         success: false,
         message: error.message || "Something went wrong",
-      });
-    }
-  };
-
-  static getinventory = async (req: Request, res: Response) => {
-    try {
-      const item = await productService.getinventory();
-      res.status(200).json({ success: true, payload: item });
-    } catch (error: any) {
-      res.status(400).json({
-        success: false,
-        message: error.message,
       });
     }
   };
@@ -51,21 +41,6 @@ export class appController {
       res.status(400).json({
         success: false,
         message: error.message,
-      });
-    }
-  };
-
-  // product creation controller
-  static createProduct = async (req: Request, res: Response) => {
-    try {
-      const data = req.body;
-      const response = await productService.createProduct(data);
-      res.status(200).json({ success: true, payload: response });
-    } catch (error: any) {
-      console.log(error);
-      res.status(400).json({
-        success: false,
-        message: error.message || "Something went wrong",
       });
     }
   };
@@ -120,26 +95,4 @@ export class appController {
       });
     }
   };
-
-  static findProductByName = async (req: Request, res: Response) => {
-    try {
-      const { productName } = req.body;
-      const response = await productService.findProductByName(productName);
-      res.status(200).json({ success: true, payload: response });
-    } catch (error: any) {
-      res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-  };
-
-  static rateProduct = asyncWrapper(async (req: Request, res: Response) => {
-    const productId = req.params.id;
-    const objectid = new mongoose.Types.ObjectId(productId);
-    const { rating, review } = req.body;
-
-    const response = await productService.rateProduct(objectid, rating, review);
-    res.status(200).json({ status: true, payload: response });
-  });
 }
