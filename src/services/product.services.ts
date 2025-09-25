@@ -4,6 +4,7 @@ import { IInventory } from "../interface/intentory.interface";
 import { IProduct } from "../interface/product.interface";
 import { throwCustomError } from "../midddleware/errorHandler.midleware";
 import { productValidate } from "../validation/product.validate";
+import { reviewModel } from "../models/review.model";
 export class productService {
   static findById = async (id: Types.ObjectId) => {
     if (!id) {

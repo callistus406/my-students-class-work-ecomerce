@@ -126,16 +126,11 @@ export class AuthController {
 
   // ==================|| KYC VERIFICATION ||==============================================
   static verifyKyc = asyncWrapper(async (req: IRequest, res: Response) => {
-    req.body.firstName = req.body.firstName.toLowerCase();
-    req.body.lastName = req.body.lastName.toLowerCase();
-
-    const { firstName, lastName, dateOfBirth, bvn, nin } = req.body;
+    const { dateOfBirth, bvn, nin } = req.body;
 
     const userId = req.user.id;
 
     const response = await UserService.verifyKyc({
-      firstName,
-      lastName,
       dateOfBirth,
       bvn,
       nin,

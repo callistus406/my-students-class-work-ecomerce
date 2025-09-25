@@ -1,6 +1,6 @@
 import { Paystack } from "../utils/paystack";
 
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { throwCustomError } from "../midddleware/errorHandler.midleware";
 import { CustomerRepository } from "../repository/customer-repository";
 
@@ -10,11 +10,6 @@ export class CustomerServices {
     if (!res) {
       throw throwCustomError("Unable to perform operation", 403);
     }
-    // return {
-    //   userId:_id
-    //   email: (res.userId as any).email,
-    //   name: `${res.firstName} ${res.lastName}`,
-    // };
     return res;
   };
 
@@ -23,10 +18,30 @@ export class CustomerServices {
     if (!res) {
       throw throwCustomError("unable to perform task", 405);
     }
-    return {
-      userId: res.userId,
-      email: (res.userId as any).email,
-      name: `${res.firstName} ${res.lastName}`,
-    };
+    return res;
   };
+
+  static async rating(
+    productId: Types.ObjectId,
+    userId: Types.ObjectId,
+    rating: string,
+    comment: string
+  ): Promise<any> {
+    const response = await CustomerRepository.rating({
+      productId,
+      userId,
+      rating,
+      comment,
+    });
+    if (!response) {
+      throw throwCustomError("unable to review this product", 400);
+    }
+    return {
+      productId: response.productId,
+      productName: response.productId.productName,
+      firstName: response.userId.firstName,
+      rating: rating,
+      comment: comment,
+    };
+  }
 }

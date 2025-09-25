@@ -4,6 +4,7 @@ import { AuthController } from "../controller/auth.controller";
 import { cartController } from "../controller/cart.controller";
 import { PaystackController } from "../controller/auth.paystack";
 import { InventoryController } from "../controller/inventory.controller";
+import { AuthCstController } from "../controller/auth.customer.controller";
 
 const router = express.Router();
 //authentication
@@ -11,6 +12,8 @@ router.post("/auth/pre-register", AuthController.preRegister);
 router.post("/auth/register", AuthController.registration);
 router.get("/auth/profile", authMiddleware as any, AuthController.getUser);
 router.get("/auth/login", AuthController.login);
+router.get("/customers", AuthCstController.getAllCustomers);
+router.get("/get-customer/:id", AuthCstController.getCustomerById);
 router.post(
   "/auth/upgrade-kyc",
   authMiddleware as any,
@@ -36,10 +39,15 @@ router.post("/inventory/products", InventoryController.createProduct);
 router.get("/inventory/products", InventoryController.getProducts);
 router.get("/inventory/products/:id", InventoryController.findById);
 router.delete("/inventory/products/:id", InventoryController.deleteProduct);
+
 router.post("/cart/create",cartController.createCart)
 //router.post("/cart/add", cartController.addToCart);
 //router.get("/cart/:userId", cartController.getCart);
 //router.delete("/cart/remove/:userId/:productId", cartController.removeFromCart);
 router.put("/cart/update", cartController.updateCart);
+router.post(
+  "/inventory/product/:productId/rating",
+  InventoryController.rateProduct
+);
 
 export default router;

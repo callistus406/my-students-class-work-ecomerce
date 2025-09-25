@@ -199,6 +199,7 @@ export class UserService {
   static resetPassword = async (
     email: string,
     otp: string,
+
     newPassword: string
   ) => {
     if (!email || !otp || !newPassword) {
@@ -285,18 +286,14 @@ export class UserService {
   // =====================|| KYC VERIFICATION ||=========================
 
   static async verifyKyc(data: {
-    firstName: string;
-    lastName: string;
     dateOfBirth: string;
     nin: string;
     bvn: string;
     userId: Types.ObjectId;
   }) {
-    const { firstName, lastName, dateOfBirth, nin, bvn, userId } = data;
+    const { dateOfBirth, nin, bvn, userId } = data;
 
     const { error } = kycValidate.validate({
-      firstName: data.firstName,
-      lastName: data.lastName,
       dateOfBirth: data.dateOfBirth,
       nin: data.nin,
       bvn: data.bvn,
@@ -330,8 +327,8 @@ export class UserService {
     //call external API
     const isUser = kycRecords.find(
       (item) =>
-        item.firstName.toLowerCase() === data.firstName &&
-        item.lastName.toLowerCase() === data.lastName
+        item.firstName.toLowerCase() === user.firstName &&
+        item.lastName.toLowerCase() === user.lastName
     );
     if (!isUser) {
       throw throwCustomError("No record found", 403);
@@ -340,8 +337,8 @@ export class UserService {
     const isDob = kycRecords.find(
       (x) =>
         x.dateOfBirth === data.dateOfBirth &&
-        x.firstName.toLowerCase() === data.firstName &&
-        x.lastName.toLowerCase() === data.lastName
+        x.firstName.toLowerCase() === user.firstName &&
+        x.lastName.toLowerCase() === user.lastName
     );
     if (!isDob) {
       throw throwCustomError("Invalid credentials", 403);
@@ -350,8 +347,8 @@ export class UserService {
     const isNinValid = kycRecords.find(
       (result) =>
         result.nin === data.nin &&
-        result.firstName.toLowerCase() === data.firstName &&
-        result.lastName.toLowerCase() === data.lastName
+        result.firstName.toLowerCase() === user.firstName &&
+        result.lastName.toLowerCase() === user.lastName
     );
     if (!isNinValid) {
       throw throwCustomError("Invalid NIN", 403);
@@ -360,8 +357,8 @@ export class UserService {
     const isBvnValid = kycRecords.find(
       (result) =>
         result.bvn === data.bvn &&
-        result.firstName.toLowerCase() === data.firstName &&
-        result.lastName.toLowerCase() === data.lastName
+        result.firstName.toLowerCase() === user.firstName &&
+        result.lastName.toLowerCase() === user.lastName
     );
     if (!isBvnValid) {
       throw throwCustomError("Invalid BVN", 402);
@@ -369,8 +366,6 @@ export class UserService {
 
     //KYC should be approved
     const validate = await UserRepository.saveKyc({
-      firstName,
-      lastName,
       dateOfBirth,
       nin: hashNin,
       bvn: hashBvn,

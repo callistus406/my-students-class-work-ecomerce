@@ -5,9 +5,12 @@ export const preValidate = Joi.object({
   lastName: Joi.string().min(2).max(30).required(),
   email: Joi.string().email().required(),
   password: Joi.string()
-  .min(7)
+  .min(8)
   .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>]).+$/)
   .messages({
+    .min(8)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$^&*)(=+|)]).+$/)
+    .messages({
       "string.pattern.base":
         "Password must include lowercase, uppercase, number and special character.",
       "string.min": "Password must be at least 7 characters",
@@ -27,8 +30,6 @@ export const loginValidate = Joi.object({
 });
 
 export const kycValidate = Joi.object({
-  firstName: Joi.string().required(),
-  lastName: Joi.string().required(),
   dateOfBirth: Joi.string().required(),
   nin: Joi.string().length(11).required(),
   bvn: Joi.string().length(11).required(),

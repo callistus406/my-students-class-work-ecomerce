@@ -1,7 +1,6 @@
 import mongoose, {Schema} from "mongoose";
 
-export const reviewSchema = new Schema({
-  id: { type: Schema.Types.ObjectId, require: true, unique: true },
+const reviewSchema = new Schema({
   productId: { type: Schema.Types.ObjectId, ref: "Product", require: true },
   userId: { type: Schema.Types.ObjectId, ref: "User", require: true },
   rating: { type: Number, require: true, min: 1, max: 5 },
@@ -10,4 +9,4 @@ export const reviewSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const reviewModel = mongoose.model("Review", reviewSchema);
+export const reviewModel = mongoose.model("Review", reviewSchema);
