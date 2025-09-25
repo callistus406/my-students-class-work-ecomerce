@@ -9,13 +9,18 @@ export class cartService {
     const { error } = cartValidate.validate(data);
     if (error) throwCustomError(`Validation error: ${error.message}`, 400);
 
-    const totalPrice = data.items.reduce(
-      (sum, item) => sum + item.unitPrice * item.quantity,
-      0
-    );
+    // Calculate total price
+
+
+    const totalPrice = cartService.calculateTotalPrice(data.items);
+
     const response = await cartRepository.cart({ ...data, totalPrice });
     return response;
   };
+
+  static calculateTotalPrice = (items:  { unitPrice: number; quantity: number }[]) => {
+    return items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+  }
 
 static removeItemFromCart = async (
   userId: string,
@@ -34,13 +39,10 @@ static removeItemFromCart = async (
 };
 
 
-  static updateCart = async (userId: string, newItem: any) => {
-    if (!Types.ObjectId.isValid(userId)) {
-      throwCustomError("Invalid userId", 400);
-    }
+  static updateCart = async ( data: Cart) => {
+  if (!data) throwCustomError("No data provided for update", 400);
     const response = await cartRepository.updateCart(
-      userId as any,
-      newItem
+      data
     );
     return response;
   };

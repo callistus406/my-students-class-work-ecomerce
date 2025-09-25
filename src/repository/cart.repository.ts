@@ -8,6 +8,11 @@ export class cartRepository {
     return response;
   };
 
+  static async getCartId(userId: Types.ObjectId) {
+    const cart = await cartModel.findOne({ userId });
+    return cart;
+  }
+
   static async addItemToCart(userId: Types.ObjectId, newItem: CartItem) {
     const cart = await cartModel.findOne({ userId });
 
@@ -52,14 +57,14 @@ export class cartRepository {
     productId: Types.ObjectId
   ) {
     const cart = await cartModel.findOneAndUpdate(
-      { userId: userId },
+      { userId: userId }, 
       { $pull: { products: { productId: productId } } },
     );
     return cart;
   }
 
-  static updateCart = async (userId: Types.ObjectId, data: Partial<Cart>) => {
-    const cart = await cartModel.findOneAndUpdate({ userId }, data, {
+  static updateCart = async ( data:Cart) => {
+    const cart = await cartModel.findOneAndUpdate(data, {
       new: true,
     });
     return cart;

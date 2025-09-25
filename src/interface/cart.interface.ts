@@ -6,11 +6,10 @@ export interface CartItem {
   productName: string;
   unitPrice: number;
   quantity: number;
-  image: string;
+  image?: string;
 }
 
 export interface Cart {
-  userId?: Types.ObjectId;
   items: CartItem[];
   couponCode?: string;
   currency: string;

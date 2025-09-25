@@ -23,9 +23,8 @@ export class cartController {
 
   static updateCart = async (req: Request, res: Response) => {
     try {
-      const { userId } = req.params;
-      const newItem = req.body;
-      await cartService.updateCart(userId, newItem);
+      const data = req.body;
+      await cartService.updateCart(data);
       res.status(200).json({ message: "Cart updated successfully" });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
