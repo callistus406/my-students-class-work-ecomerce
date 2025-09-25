@@ -5,22 +5,14 @@ import { asyncWrapper } from "../midddleware/asyncWrapper";
 
 export class InventoryController {
   // product creation controller
-  static createProduct = async (req: Request, res: Response) => {
-    try {
-      const data = req.body.data;
-      const response = await productService.createProduct(data);
-      res.status(200).json({ success: true, payload: response });
-    } catch (error: any) {
-      console.log(error);
-      res.status(400).json({
-        success: false,
-        message: error.message || "Something went wrong",
-      });
-    }
-  };
+  static createProduct = asyncWrapper(async (req: Request, res: Response) => {
+    const data = req.body.data;
+    const response = await productService.createProduct(data);
+    res.status(200).json({ success: true, payload: response });
+  });
 
-  static findById = async (req: Request, res: Response) => {
-    try {
+  static findById = asyncWrapper(async (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
       const id = req.params.id;
       const objectId = new mongoose.Types.ObjectId(id);
       const item = await productService.findById(objectId);
@@ -36,63 +28,36 @@ export class InventoryController {
         success: true,
         payload: item,
       });
-    } catch (error: any) {
-      console.log(error);
-      res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-  };
+    };
+  });
 
   // get product
-  static getproduct = async (req: Request, res: Response) => {
-    try {
-      const { page, limit } = req.query as {
-        page: string;
-        limit: string;
-      };
+  static getProducts = asyncWrapper(async (req: Request, res: Response) => {
+    const filter = {
+      page: req.query.page?.toString(),
+      limit: req.query.limit?.toString(),
+      search: req.query.search?.toString(),
+    };
 
-      const response = await productService.getProducts({ page, limit });
+    const response = await productService.getProducts(filter);
 
-      return res.status(200).json({
-        success: true,
-        ...response,
-      });
-    } catch (error: any) {
-      console.error(error);
-      return res.status(500).json({
-        success: false,
-        message: error.message || "Server error",
-      });
-    }
-  };
+    return res.status(200).json({
+      success: true,
+      ...response,
+    });
+  });
 
   // update product controller
-  static updateProduct = async (req: Request, res: Response) => {
-    try {
-      const id = req.params.id;
-      const response = await productService.updateProduct(id);
-      res.status(200).json({ success: true, payload: response });
-    } catch (error: any) {
-      res.status(400).json({
-        success: false,
-        message: error.message || "Something went wrong",
-      });
-    }
-  };
+  static updateProduct = asyncWrapper(async (req: Request, res: Response) => {
+    const id = req.params.id;
+    const response = await productService.updateProduct(id);
+    res.status(200).json({ success: true, payload: response });
+  });
 
   // delete product controller
-  static deleteProduct = async (req: Request, res: Response) => {
-    try {
-      const id = req.params.id;
-      const response = await productService.deleteProduct(id);
-      res.status(200).json({ success: true, payload: response });
-    } catch (error: any) {
-      res.status(400).json({
-        success: false,
-        message: error.message || "Something went wrong",
-      });
-    }
-  };
+  static deleteProduct = asyncWrapper(async (req: Request, res: Response) => {
+    const id = req.params.id;
+    const response = await productService.deleteProduct(id);
+    res.status(200).json({ success: true, payload: response });
+  });
 }

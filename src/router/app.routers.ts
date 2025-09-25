@@ -1,6 +1,7 @@
 import express from "express";
 import { authMiddleware } from "../midddleware/auth.middleware";
 import { AuthController } from "../controller/auth.controller";
+import { cartController } from "../controller/cart.controller";
 import { PaystackController } from "../controller/auth.paystack";
 import { InventoryController } from "../controller/inventory.controller";
 import { AuthCstController } from "../controller/auth.customer.controller";
@@ -26,7 +27,7 @@ router.post(
 router.post("/auth/reset-password", AuthController.resetPassword);
 
 // paystack
-router.post("/initiate-payment", PaystackController.initiatePayment);
+router.post("/initiate-payment", PaystackController.initiatePayment as any);
 router.get("/verify-payment/:reference", PaystackController.verifyPayment);
 router.post(
   "/paystack/callback",
@@ -35,9 +36,15 @@ router.post(
 
 // inventory route section
 router.post("/inventory/products", InventoryController.createProduct);
-router.get("/inventory/products", InventoryController.getproduct as any);
-router.get("/inventory/products/:id", InventoryController.findById as any);
+router.get("/inventory/products", InventoryController.getProducts);
+router.get("/inventory/products/:id", InventoryController.findById);
 router.delete("/inventory/products/:id", InventoryController.deleteProduct);
+
+router.post("/cart/create",cartController.createCart)
+//router.post("/cart/add", cartController.addToCart);
+//router.get("/cart/:userId", cartController.getCart);
+//router.delete("/cart/remove/:userId/:productId", cartController.removeFromCart);
+router.put("/cart/update", cartController.updateCart);
 router.post(
   "/inventory/product/:productId/rating",
   InventoryController.rateProduct

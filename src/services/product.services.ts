@@ -13,15 +13,19 @@ export class productService {
     const response = await productRepository.findById(id);
     return response;
   };
-
   // product creation service
 
   static createProduct = async (data: IProduct) => {
-    //Note this is not the complete logic
     const { error } = productValidate.validate(data);
     if (error) {
       throw throwCustomError(error.message, 422);
     }
+
+    if (data.price <= 0)
+      throw throwCustomError("Price must be greater than 0", 400);
+    if (data.stock < 0) throw throwCustomError("Stock cannot be negative", 400);
+    if (data.quantity < 0)
+      throw throwCustomError("Quantity cannot be negative", 400);
 
     //generate slug from product name
 
@@ -43,14 +47,17 @@ export class productService {
   };
 
   // get product
-  static getProducts = async (filter: { page: string; limit: string }) => {
-    const page = parseInt(filter.page) || 1;
-    const limit = parseInt(filter.limit) || 10;
+  static async getProducts(filter?: { page?: string; limit?: string; search?: string }) {
+    let page = parseInt(filter?.page || "1", 10);
+    let limit = parseInt(filter?.limit || "10", 10);
+    const search = filter?.search || "";
 
-    const response = await productRepository.getProducts(page, limit);
+    if (isNaN(page) || page < 1) page = 1;
+    if (isNaN(limit) || limit < 1) limit = 10;
+    if (limit > 100) limit = 100; // prevent abuse
 
-    return response;
-  };
+    return productRepository.getProducts(page, limit, search);
+  }
 
   // update product service
   static updateProduct = async (id: string) => {

@@ -1,5 +1,5 @@
 import { IProduct } from "../interface/product.interface";
-import { productModel } from "../models/product.model";
+import {productModel} from "../models/product.model";
 import { Types } from "mongoose";
 
 export class productRepository {
@@ -17,17 +17,24 @@ export class productRepository {
   };
 
   // get product
-  static getProducts = async (page: number, limit: number) => {
+  static getProducts = async (page: number, limit: number, search: string = "") => {
     const skip = (page - 1) * limit;
 
+     const escapeRegex = (str: string) =>
+    str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  const query = search
+    ? { productName: { $regex: escapeRegex(search), $options: "i" } }
+    : {};
+
     const response = await productModel
-      .find()
+      .find(query)
       .lean()
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
 
-    const count = await productModel.countDocuments();
+    const count = await productModel.countDocuments(query);
 
     const total = Math.ceil(count / limit);
 
