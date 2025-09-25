@@ -1,18 +1,17 @@
 import express from "express";
 import { authMiddleware } from "../midddleware/auth.middleware";
 import { AuthController } from "../controller/auth.controller";
-import { PaystackController } from "../controller/auth.paystack";
+import { PaystackController } from "../controller/paystack.controller";
 import { InventoryController } from "../controller/inventory.controller";
-import { AuthCstController } from "../controller/auth.customer.controller";
+import { CustomerController } from "../controller/customer.customer.controller";
+import { UserController } from "../controller/user.controller";
 
 const router = express.Router();
 //authentication
 router.post("/auth/pre-register", AuthController.preRegister);
 router.post("/auth/register", AuthController.registration);
-router.get("/auth/profile", authMiddleware as any, AuthController.getUser);
+router.get("/auth/profile", authMiddleware as any, UserController.getUser);
 router.get("/auth/login", AuthController.login);
-router.get("/customers", AuthCstController.getAllCustomers);
-router.get("/get-customer/:id", AuthCstController.getCustomerById);
 router.post(
   "/auth/upgrade-kyc",
   authMiddleware as any,
@@ -25,9 +24,15 @@ router.post(
 );
 router.post("/auth/reset-password", AuthController.resetPassword);
 
+//users
+router.patch("/profile/update", UserController.updateProfile);
+router.patch("/profile/password/update", UserController.updatePassword);
+//customers
+router.get("/customers", CustomerController.getAllCustomers);
+router.get("/get-customer/:id", CustomerController.getCustomerById);
 // paystack
-router.post("/initiate-payment", PaystackController.initiatePayment);
-router.get("/verify-payment/:reference", PaystackController.verifyPayment);
+router.post("/paystack/payment", PaystackController.initiatePayment as any);
+router.get("/paystack/payment/:reference", PaystackController.verifyPayment);
 router.post(
   "/paystack/callback",
   PaystackController.handleCallback.bind(PaystackController)
@@ -38,9 +43,6 @@ router.post("/inventory/products", InventoryController.createProduct);
 router.get("/inventory/products", InventoryController.getproduct as any);
 router.get("/inventory/products/:id", InventoryController.findById as any);
 router.delete("/inventory/products/:id", InventoryController.deleteProduct);
-router.post(
-  "/inventory/product/:productId/rating",
-  InventoryController.rateProduct
-);
+router.post("/inventory/product/:productId/rating", InventoryController.rating);
 
 export default router;

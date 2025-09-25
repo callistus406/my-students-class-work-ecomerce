@@ -1,6 +1,8 @@
 import { IProduct } from "../interface/product.interface";
+import { IReview } from "../interface/review.interface";
 import { productModel } from "../models/product.model";
 import { Types } from "mongoose";
+import { reviewModel } from "../models/review.model";
 
 export class productRepository {
   static findById = async (id: Types.ObjectId) => {
@@ -66,4 +68,15 @@ export class productRepository {
     const response = await productModel.findOne({ slug }).lean();
     return response;
   };
+  //Product rating
+  static async rating(review: IReview): Promise<any> {
+    const response = await reviewModel.create({
+      productId: review.productId,
+      userId: review.userId,
+      rating: review.rating,
+      comment: review.comment,
+    });
+    if (!response) return null;
+    return response;
+  }
 }

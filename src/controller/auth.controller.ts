@@ -90,20 +90,20 @@ export class AuthController {
     }
   };
 
-  static getUser = async (req: Request, res: Response) => {
-    try {
-      const response = await UserService.getUser();
-      res.status(200).json({
-        message: "Success",
-        data: response,
-      });
-    } catch (error: any) {
-      res.status(400).json({
-        message: "Bad Request",
-        data: error.message,
-      });
-    }
-  };
+  // static getUser = async (req: Request, res: Response) => {
+  //   try {
+  //     const response = await UserService.getUser();
+  //     res.status(200).json({
+  //       message: "Success",
+  //       data: response,
+  //     });
+  //   } catch (error: any) {
+  //     res.status(400).json({
+  //       message: "Bad Request",
+  //       data: error.message,
+  //     });
+  // }
+  // };
 
   static login = asyncWrapper(async (req: Request, res: Response) => {
     req.body.email = req.body.email.toLowerCase();

@@ -2,6 +2,7 @@ import { productService } from "../services/product.services";
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { asyncWrapper } from "../midddleware/asyncWrapper";
+import { IRequest } from "../midddleware/auth.middleware";
 
 export class InventoryController {
   // product creation controller
@@ -95,4 +96,18 @@ export class InventoryController {
       });
     }
   };
+  //Product Rating
+  static rating = asyncWrapper(async (req: IRequest, res: Response) => {
+    const productId = req.params.id;
+    const objectId = new mongoose.Types.ObjectId(productId);
+    const userId = req.user.id;
+    const { rating, comment } = req.body;
+    const response = await productService.rating(
+      objectId,
+      userId,
+      rating,
+      comment
+    );
+    res.status(200).json({ success: true, payload: response });
+  });
 }

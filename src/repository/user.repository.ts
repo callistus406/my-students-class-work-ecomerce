@@ -49,7 +49,7 @@ export class UserRepository {
     return user;
   };
 
-  static getUserById = async (userId: string) => {
+  static getUserById = async (userId: Types.ObjectId) => {
     const user = await userModel.findById(userId).select("-password,-__v");
     return user;
   };
@@ -124,6 +124,25 @@ export class UserRepository {
     const user = await userModel.findOne({ email, password });
     return user;
   }
+
+  //Update Password
+  static updatePassword = async (
+    id: Types.ObjectId,
+    updateData: any
+  ): Promise<any> => {
+    const response = await userModel.findOneAndUpdate(id, updateData, {
+      new: true,
+    });
+    if (!response) return null;
+    return response;
+  };
+
+  static updateProfile = async (id: Types.ObjectId, user: any) => {
+    const response = await userModel.findOneAndUpdate(id, user, { new: true });
+    if (!response) return null;
+    return response;
+  };
+
   //============================||VERIFY KYC ||=============================
 
   static async saveKyc(data: {

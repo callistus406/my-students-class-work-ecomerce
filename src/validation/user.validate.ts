@@ -31,3 +31,29 @@ export const kycValidate = Joi.object({
   nin: Joi.string().length(11).required(),
   bvn: Joi.string().length(11).required(),
 });
+
+export const profileSchema = Joi.object({
+  firstName: Joi.string().required(),
+  lastName: Joi.string().required(),
+});
+
+export const updatePwd = Joi.object({
+  password: Joi.string()
+    .required()
+    .min(8)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$^&*)(=+|)]).+$/)
+    .messages({
+      "string.pattern.base":
+        "Password must include lowercase, uppercase, number and special character.",
+      "string.min": "Password must be at least 8 characters",
+    }),
+  confirmPassword: Joi.string()
+    .required()
+    .min(8)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$^&*)(=+|)]).+$/)
+    .messages({
+      "string.pattern.base":
+        "Password must include lowercase, uppercase, number and special character.",
+      "string.min": "Password must be at least 8 characters",
+    }),
+});

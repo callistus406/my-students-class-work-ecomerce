@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
@@ -10,6 +10,8 @@ import {
   preValidate,
   userValidate,
   kycValidate,
+  updatePwd,
+  profileSchema,
 } from "../validation/user.validate";
 import { IPreRegister, IVerifyUser } from "../interface/user.interface";
 import { throwCustomError } from "../midddleware/errorHandler.midleware";
@@ -229,7 +231,12 @@ export class UserService {
   };
 
   static getUser = async (userId: Types.ObjectId) => {
-    return await UserRepository.getUser(userId);
+    // const objectId = new mongoose.Types.ObjectId(userId)
+    const response = await UserRepository.getUserById(userId);
+    if (!response) {
+      throw throwCustomError("unable to perform operation", 422);
+    }
+    return response;
   };
 
   static login = async (
@@ -377,4 +384,48 @@ export class UserService {
     }
     return `Your ${user.role} account has been Verified`;
   }
+  //Update password
+  static updatePassword = async (
+    id: Types.ObjectId,
+    updateData: {
+      password: string;
+      confirmPassword: string;
+    }
+  ) => {
+    const { password, confirmPassword } = updateData;
+    const { error } = updatePwd.validate(updateData);
+    if (error) {
+      throw throwCustomError(error.message, 422);
+    }
+
+    const user = await UserRepository.findUserById(id);
+    if (!user) {
+      throw throwCustomError("Invalid record found", 422);
+    }
+    if (confirmPassword.trim() !== password.trim()) {
+      throw throwCustomError("password must match", 422);
+    }
+    const hashedPassword = bcrypt.hash(confirmPassword, 10);
+    const response = await UserRepository.updatePassword(id, hashedPassword);
+    if (!response) {
+      throw throwCustomError("unable to change password", 422);
+    }
+    return response;
+  };
+  //update Profile
+  static updateProfile = async (userId: Types.ObjectId, user: any) => {
+    const { error } = profileSchema.validate(user);
+    if (error) {
+      throw throwCustomError(error.message, 422);
+    }
+    const res = await UserRepository.findUserById(userId);
+    if (!res) {
+      throw throwCustomError("No user Found", 422);
+    }
+    const response = await UserRepository.updateProfile(userId, user);
+    if (!response) {
+      throw throwCustomError("Unable to update Profile", 422);
+    }
+    return response;
+  };
 }
