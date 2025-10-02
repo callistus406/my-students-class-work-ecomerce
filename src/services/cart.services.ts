@@ -6,14 +6,15 @@ import { Types } from "mongoose";
 import { productRepository } from "../repository/product.repository";
 
 export class cartService {
-  static createCart = async (data: any) => {
+  static createCart = async (data: Cart) => {
     const { error } = cartValidate.validate(data);
     if (error) throwCustomError(`Validation error: ${error.message}`, 400);
 
-    const product = await productRepository.findById(data.productId);
 
-    if (!product) throw throwCustomError("Product not found", 404);
     //get product by id
+    const product = await productRepository.findById(data.productId as any);
+    if (!product) throw throwCustomError("Product not found", 404);
+
     // Calculate total price
 
     const response = await cartRepository.cart({ ...data });
@@ -42,3 +43,4 @@ export class cartService {
   };
 
 
+}
