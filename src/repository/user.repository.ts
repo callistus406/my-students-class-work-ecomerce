@@ -5,6 +5,7 @@ import { otpModel } from "../models/otp.model";
 import { IPreRegister } from "../interface/user.interface";
 import { throwCustomError } from "../midddleware/errorHandler.midleware";
 import { customerModel } from "../models/customer.model";
+import { uploadModel } from "../models/upload.model copy";
 
 export class UserRepository {
   static createUser = async (user: IPreRegister) => {
@@ -67,11 +68,12 @@ export class UserRepository {
     return user;
   };
 
-  static async findUserById(userId: Types.ObjectId) {
+  static async findUserById(userId: Types.ObjectId): Promise<any> {
     const response = await userModel.findById({ _id: userId });
-    if (!Types.ObjectId.isValid(userId)) {
-      throw throwCustomError("Invalid User ID", 406);
-    }
+    if (!response) return null;
+    // if (!Types.ObjectId.isValid(id)) {
+    //   throw throwCustomError("Invalid User ID", 406);
+    // }
     return response;
   }
   static saveOtp = async (email: string, otp: string) => {
@@ -127,18 +129,30 @@ export class UserRepository {
 
   //Update Password
   static updatePassword = async (
-    id: Types.ObjectId,
-    updateData: any
-  ): Promise<any> => {
-    const response = await userModel.findOneAndUpdate(id, updateData, {
+    // id: Types.ObjectId,
+    filter: any,
+    update: any
+  ) => {
+    const response = await userModel.findByIdAndUpdate(filter, update, {
       new: true,
     });
     if (!response) return null;
     return response;
   };
 
-  static updateProfile = async (id: Types.ObjectId, user: any) => {
-    const response = await userModel.findOneAndUpdate(id, user, { new: true });
+  static updateProfile = async (
+    id: Types.ObjectId,
+    update: { firstName: string; lastName: string }
+  ) => {
+    const response = await userModel.findOneAndUpdate(id, update, {
+      new: true,
+    });
+    if (!response) return null;
+    return response;
+  };
+
+  static profilePicture = async (path: string): Promise<any> => {
+    const response = await uploadModel.create({ filePath: path });
     if (!response) return null;
     return response;
   };

@@ -3,7 +3,10 @@ import { Types } from "mongoose";
 import { IInventory } from "../interface/intentory.interface";
 import { IProduct } from "../interface/product.interface";
 import { throwCustomError } from "../midddleware/errorHandler.midleware";
-import { productValidate } from "../validation/product.validate";
+import {
+  productValidate,
+  ratingValidate,
+} from "../validation/product.validate";
 import { reviewModel } from "../models/review.model";
 export class productService {
   static findById = async (id: Types.ObjectId) => {
@@ -93,7 +96,10 @@ export class productService {
     comment: string
   ): Promise<any> => {
     //TODO: validation
-
+    const { error } = ratingValidate.validate({ rating, comment });
+    if (error) {
+      throw throwCustomError(error.message, 422);
+    }
     const response = await productRepository.rating({
       productId,
       userId,

@@ -1,6 +1,8 @@
 import mongoose, { Types } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { scrypt, randomFill, createCipheriv } from "node:crypto";
+import { promisify } from "node:util";
 import crypto from "crypto";
 import { otpModel } from "../models/otp.model";
 import { JWT_SECRET, JWT_EXP, JWT_ADMIN_KEY } from "../config/system.variable";
@@ -21,6 +23,7 @@ import { confirmationTemplate } from "../utils/login-confirmation-template";
 import { kycRecords } from "../utils/kyc-records";
 import { CustomerRepository } from "../repository/customer-repository";
 import { MerchantRepository } from "../repository/merchant-repository";
+import { IEncrypt } from "../interface/encrypt-interface";
 
 export class UserService {
   static preRegister = async (user: IPreRegister) => {
@@ -313,12 +316,16 @@ export class UserService {
       throw throwCustomError("no record found", 422);
     }
     // check if user is already verified
-    if (user.is_verified) {
-      throw throwCustomError(
-        `Your ${user.role} account is already verified`,
-        412
-      );
-    }
+    // if (user.is_verified) {
+    //   throw throwCustomError(
+    //     `Your ${user.role} account is already verified`,
+    //     412
+    //   );
+    // }
+
+    // } catch (error: any) {
+    //   throw throwCustomError(error.message, 404);
+    // }
 
     const hashNin = await bcrypt.hash(data.nin, 5);
     if (!hashNin) {
@@ -359,6 +366,21 @@ export class UserService {
     if (!isNinValid) {
       throw throwCustomError("Invalid NIN", 403);
     }
+    console.log("This is data.nina", data.nin);
+
+    const encrypt = await UserService.encryptData(
+      data.nin,
+      (err, encrypted) => {
+        if (err) console.log(err);
+        console.log("this is callback :", encrypted);
+        console.log("this is funt:", encrypt);
+      }
+    );
+    // console.log("thi is the:", encrypt);
+    // if (!encrypt) {
+    //   throw throwCustomError("unable to encrypt nin", 422);
+    // }
+
     //check BVN authentication
     const isBvnValid = kycRecords.find(
       (result) =>
@@ -370,64 +392,139 @@ export class UserService {
       throw throwCustomError("Invalid BVN", 402);
     }
 
-    //KYC should be approved
     const validate = await UserRepository.saveKyc({
       dateOfBirth,
-      nin: hashNin,
+      nin,
       bvn: hashBvn,
       userId,
     });
-
+    console.log("validate nin:", validate?.nin);
     if (!validate) {
       throw throwCustomError("Unable to verify KYC", 422);
     }
+
     return `Your ${user.role} account has been Verified`;
   }
   //Update password
   static updatePassword = async (
-    id: Types.ObjectId,
-    updateData: {
+    userId: Types.ObjectId,
+    password: string,
+    update: {
       password: string;
       confirmPassword: string;
     }
   ) => {
-    const { password, confirmPassword } = updateData;
-    const { error } = updatePwd.validate(updateData);
+    //  const { password, confirmPassword } = update;
+    const { error } = updatePwd.validate(update);
     if (error) {
       throw throwCustomError(error.message, 422);
     }
-
-    const user = await UserRepository.findUserById(id);
+    // che
+    const user = await UserRepository.findUserById(userId);
     if (!user) {
       throw throwCustomError("Invalid record found", 422);
     }
-    if (confirmPassword.trim() !== password.trim()) {
+
+    const isPwdValid = await bcrypt.compare(password, user.password);
+    if (!isPwdValid) {
+      throw throwCustomError("Invalid Password", 422);
+    }
+    if (update.confirmPassword.trim() !== update.password.trim()) {
       throw throwCustomError("password must match", 422);
     }
-    const hashedPassword = bcrypt.hash(confirmPassword, 10);
-    const response = await UserRepository.updatePassword(id, hashedPassword);
-    if (!response) {
-      throw throwCustomError("unable to change password", 422);
-    }
-    return response;
+    user.password = await bcrypt.hash(update.confirmPassword, 10);
+    await user.save();
+    return "Password has been Updated";
   };
   //update Profile
-  static updateProfile = async (userId: Types.ObjectId, user: any) => {
-    const { error } = profileSchema.validate(user);
+  static updateProfile = async (
+    userId: Types.ObjectId,
+    password: string,
+    // path: string,
+    update: {
+      firstName: string;
+      lastName: string;
+    }
+  ) => {
+    const { error } = profileSchema.validate(update);
     if (error) {
       throw throwCustomError(error.message, 422);
     }
-    const res = await UserRepository.findUserById(userId);
-    if (!res) {
+    const user = await UserRepository.findUserById(userId);
+    if (!user) {
       throw throwCustomError("No user Found", 422);
     }
-    const response = await UserRepository.updateProfile(userId, user);
+
+    const isPwdValid = await bcrypt.compare(password, user.password);
+    if (!isPwdValid) {
+      throw throwCustomError("Incorrect password", 422);
+    }
+
+    // const domain = `http://loaclhost:8080/uploads/${path}`;
+    // const res = await UserRepository.profilePicture(domain);
+    // if (!res) {
+    //   throw throwCustomError("unable to upload profile picture", 422);
+    // }
+
+    // await res.save();
+
+    const response = await UserRepository.updateProfile(userId, update);
     if (!response) {
       throw throwCustomError("Unable to update Profile", 422);
     }
+
     return response;
   };
+
+  // static updatePicture = async(user,)
+  static profilePicture = async (userId: Types.ObjectId, path: string) => {
+    console.log(path);
+    const user = await UserRepository.findUserById(userId);
+    if (!user) {
+      throw throwCustomError("Invalid User", 422);
+    }
+    const domain = `http://localhost:8080/uploads/${path}`;
+    const response = await UserRepository.profilePicture(domain);
+    if (!response) {
+      throw throwCustomError("Unable to upload profile picture", 422);
+    }
+    return response;
+  };
+
+  //===================|| ENCRYPT ||=========================== //
+  static encryptData = async (
+    nin: string,
+    callback: (err: Error | null, encrypted?: string) => void
+  ) => {
+    const scryptAsync = promisify(scrypt);
+    const randomFillAsync = promisify(randomFill);
+    // try {
+    const algorithm = "aes-192-cbc";
+    const password = "adeyemi@2006";
+    const salt = "salt";
+
+    // const key = await scryptAsync(password, "salt", 24);
+    // const ivBuffer = await randomFillAsync(Buffer.alloc(16))
+    // First, we'll generate the key. The key length is dependent on the algorithm.
+    // In this case for aes192, it is 24 bytes (192 bits).
+    scrypt(password, "salt", 24, (err, key) => {
+      if (err) return callback(err);
+      // Then, we'll generate a random initialization vector
+      randomFill(new Uint8Array(16), (err, iv) => {
+        if (err) return callback(err);
+
+        // Once we have the key and iv, we can create and use the cipher...
+        const cipher = createCipheriv(algorithm, key, iv);
+
+        let encrypyted = cipher.update(nin, "utf8", "hex");
+        encrypyted += cipher.final("hex");
+        console.log("encrypted now", encrypyted);
+        callback(null, encrypyted);
+        // return encrypyted;
+      });
+    });
+    // } catch (error: any) {
+    //   throw throwCustomError(error.message, 422);
+    // }
+  };
 }
-
-
-symetric en
