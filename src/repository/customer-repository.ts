@@ -10,26 +10,4 @@ export class CustomerRepository {
 
     return response;
   }
-
-  static async getCustomers() {
-    const response = await customerModel.find().populate({
-      path: "userId",
-      model: "User",
-    });
-    if (!response) return null;
-    return response;
-  }
-
-  static async getCustomerById(userId: Types.ObjectId) {
-    const res = await customerModel.findById({ _id: userId }).populate({
-      path: "userId",
-      model: "User",
-    });
-    if (!res) return null;
-    return {
-      userId: res._id,
-      email: (res.userId as any).email,
-      name: `${(res.userId as any).firstName} ${(res.userId as any).lastName}`,
-    };
-  }
 }

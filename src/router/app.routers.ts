@@ -4,7 +4,6 @@ import { AuthController } from "../controller/auth.controller";
 import { MarketplaceController } from "../controller/marketplace.controller";
 import { PaystackController } from "../controller/paystack.controller";
 import { InventoryController } from "../controller/inventory.controller";
-import { CustomerController } from "../controller/customer.controller";
 import { UserController } from "../controller/user.controller";
 
 const router = express.Router();
@@ -28,9 +27,6 @@ router.post("/auth/reset-password", AuthController.resetPassword);
 //users
 router.patch("/profile/update", UserController.updateProfile);
 router.patch("/profile/password/update", UserController.updatePassword);
-//customers
-router.get("/customers", CustomerController.getAllCustomers);
-router.get("/get-customer/:id", CustomerController.getCustomerById);
 // paystack
 router.post("/paystack/payment", PaystackController.initiatePayment as any);
 router.get("/paystack/payment/:reference", PaystackController.verifyPayment);
@@ -45,11 +41,10 @@ router.get("/inventory/products", InventoryController.getProducts);
 router.get("/inventory/products/:id", InventoryController.findById);
 router.delete("/inventory/products/:id", InventoryController.deleteProduct);
 
-router.put("/cart", MarketplaceController.createCart as any);
+router.post("/cart/create", MarketplaceController.createCart as any);
 //router.post("/cart/add", cartController.addToCart);
 //router.get("/cart/:userId", cartController.getCart);
 //router.delete("/cart/remove/:userId/:productId", cartController.removeFromCart);
-
 router.post(
   "/inventory/product/:productId/rating",
   InventoryController.ratings
