@@ -6,6 +6,7 @@ import { IPreRegister } from "../interface/user.interface";
 import { throwCustomError } from "../midddleware/errorHandler.midleware";
 import { customerModel } from "../models/customer.model";
 import { uploadModel } from "../models/upload.model copy";
+import { IUpload } from "../interface/upload.interface";
 
 export class UserRepository {
   static createUser = async (user: IPreRegister) => {
@@ -142,17 +143,32 @@ export class UserRepository {
 
   static updateProfile = async (
     id: Types.ObjectId,
-    update: { firstName: string; lastName: string }
-  ) => {
+    update: {
+      firstName: string;
+      lastName: string;
+    }
+  ): Promise<any> => {
     const response = await userModel.findOneAndUpdate(id, update, {
       new: true,
     });
+
     if (!response) return null;
     return response;
   };
 
   static profilePicture = async (path: string): Promise<any> => {
-    const response = await uploadModel.create({ filePath: path });
+    const response = await uploadModel.create({
+      filePath: path,
+    });
+    if (!response) return null;
+    return response;
+  };
+
+  static picture = async (upload: IUpload) => {
+    const response = await uploadModel.create({
+      userId: upload.userId,
+      filePath: upload.filePath,
+    });
     if (!response) return null;
     return response;
   };
@@ -174,25 +190,6 @@ export class UserRepository {
         is_verified: true,
       },
       { new: true }
-    );
-    if (!response) return null;
-    return response;
-  }
-
-  static async deleteRole(userId: Types.ObjectId) {
-    const record = await customerModel.findByIdAndDelete({ __id: userId });
-    if (!record) return null;
-    return record;
-  }
-
-  //====================|| UPGRADE TO CUSTOMER OR MERCHANT ||==================
-  static async upgradeRole(userId: Types.ObjectId, role: string): Promise<any> {
-    const response = await userModel.findByIdAndUpdate(
-      userId,
-      { role },
-      {
-        new: true,
-      }
     );
     if (!response) return null;
     return response;

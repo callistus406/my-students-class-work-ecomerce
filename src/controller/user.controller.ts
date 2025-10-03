@@ -24,14 +24,14 @@ export class UserController {
   // //   update profile
   static updateProfile = asyncWrapper(async (req: IRequest, res: Response) => {
     const userId = req.user.id;
-    // const path = req.file?.originalname;
-    // if (!path) return null;
     const { password, update } = req.body;
+    const path = req.file?.originalname;
+    if (!path) return null;
     const response = await UserService.updateProfile(
       userId,
       password,
-      // path,
-      update
+      update,
+      path
     );
     res.status(200).json({ success: true, payload: response });
   });
@@ -40,7 +40,6 @@ export class UserController {
   static updatePicture = asyncWrapper(async (req: IRequest, res: Response) => {
     const userId = req.user.id;
     const path = req.file?.originalname;
-    console.log(req.file);
     if (!path) return "No file uploaded";
     const response = await UserService.profilePicture(userId, path);
     res.status(200).json({ success: true, payload: response });

@@ -24,6 +24,8 @@ import { kycRecords } from "../utils/kyc-records";
 import { CustomerRepository } from "../repository/customer-repository";
 import { MerchantRepository } from "../repository/merchant-repository";
 import { IEncrypt } from "../interface/encrypt-interface";
+import { Multer } from "multer";
+import { uploadModel } from "../models/upload.model copy";
 
 export class UserService {
   static preRegister = async (user: IPreRegister) => {
@@ -440,11 +442,11 @@ export class UserService {
   static updateProfile = async (
     userId: Types.ObjectId,
     password: string,
-    // path: string,
     update: {
       firstName: string;
       lastName: string;
-    }
+    },
+    path?: string
   ) => {
     const { error } = profileSchema.validate(update);
     if (error) {
@@ -459,26 +461,33 @@ export class UserService {
     if (!isPwdValid) {
       throw throwCustomError("Incorrect password", 422);
     }
+    console.log("password is:", password);
 
-    // const domain = `http://loaclhost:8080/uploads/${path}`;
-    // const res = await UserRepository.profilePicture(domain);
-    // if (!res) {
-    //   throw throwCustomError("unable to upload profile picture", 422);
-    // }
-
-    // await res.save();
+    if (path) {
+      const domain = `http://localhost:8080/uploads/${path}`;
+      const res = await UserRepository.picture({
+        userId: user._id,
+        filePath: domain,
+      });
+      if (!res) {
+        throw throwCustomError("unable to upload profile picture", 422);
+      }
+    }
 
     const response = await UserRepository.updateProfile(userId, update);
     if (!response) {
       throw throwCustomError("Unable to update Profile", 422);
     }
 
-    return response;
+    return {
+      firstName: response.firstName,
+      lastName: response.lastName,
+      filePath: `http://localhost:8080/uploads/${path}`,
+    };
   };
 
   // static updatePicture = async(user,)
   static profilePicture = async (userId: Types.ObjectId, path: string) => {
-    console.log(path);
     const user = await UserRepository.findUserById(userId);
     if (!user) {
       throw throwCustomError("Invalid User", 422);

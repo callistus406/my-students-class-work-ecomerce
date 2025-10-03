@@ -1,7 +1,6 @@
 import mongoose, { Schema, Types } from "mongoose";
 
 export const userSchema = new Schema({
-  //userId: { type: Types.ObjectId },
   firstName: { type: String, require: true },
   lastName: { type: String, require: true },
   email: { type: String, require: true, unique: true },
@@ -19,6 +18,10 @@ export const userSchema = new Schema({
   },
   bvn: {
     type: String,
+  },
+  ProfileImageId: {
+    type: Types.ObjectId,
+    ref: "Uploads",
   },
   is_verified: { type: Boolean, require: true, default: false },
   createdAt: { type: Date, default: Date.now },
