@@ -27,13 +27,17 @@ export class UserController {
     const { password, update } = req.body;
     const path = req.file?.originalname;
     if (!path) return null;
-    const response = await UserService.updateProfile(
-      userId,
-      password,
-      update,
-      path
-    );
-    res.status(200).json({ success: true, payload: response });
+    try {
+      const response = await UserService.updateProfile(
+        userId,
+        password,
+        update,
+        path
+      );
+      res.status(200).json({ success: true, payload: response });
+    } catch (error: any) {
+      res.status(400).json({ success: true, message: error });
+    }
   });
 
   //   upate profile picture

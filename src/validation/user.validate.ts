@@ -37,6 +37,7 @@ export const kycValidate = Joi.object({
 export const profileSchema = Joi.object({
   firstName: Joi.string().required(),
   lastName: Joi.string().required(),
+  path: Joi.string().optional(),
 });
 
 export const updatePwd = Joi.object({

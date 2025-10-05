@@ -12,7 +12,3 @@ export interface IVerifyUser {
   otp: string;
   is_verified: true;
 }
-
-// Step: provide basic information
-// step2: confirm account
-// step3: login

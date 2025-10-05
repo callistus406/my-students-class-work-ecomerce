@@ -29,7 +29,7 @@ router.post("/auth/reset-password", AuthController.resetPassword);
 //users
 router.patch(
   "/profile/update",
-  upload.single("file") as any,
+  upload.single("image") as any,
   authMiddleware as any,
   UserController.updateProfile
 );

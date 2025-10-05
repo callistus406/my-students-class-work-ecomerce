@@ -146,6 +146,7 @@ export class UserRepository {
     update: {
       firstName: string;
       lastName: string;
+      imageFile?: string | undefined;
     }
   ): Promise<any> => {
     const response = await userModel.findOneAndUpdate(id, update, {
@@ -156,7 +157,7 @@ export class UserRepository {
     return response;
   };
 
-  static profilePicture = async (path: string): Promise<any> => {
+  static profilePicture = async (path?: string): Promise<any> => {
     const response = await uploadModel.create({
       filePath: path,
     });
