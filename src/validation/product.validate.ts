@@ -13,3 +13,8 @@ export const productValidate = Joi.object({
   images: Joi.array().items(Joi.string()).optional(),
   tags: Joi.array().items(Joi.string()).optional(),
 });
+
+export const ratingValidate = Joi.object({
+  rating: Joi.number().required().min(1).max(5),
+  comment: Joi.string().required().max(100).min(4),
+});

@@ -41,6 +41,4 @@ export class cartService {
 
     return { success: true, message: "Item removed from cart", cart: response };
   };
-
-
 }

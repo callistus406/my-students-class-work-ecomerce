@@ -1,6 +1,6 @@
 import { productService } from "../services/product.services";
 import { Request, Response } from "express";
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { asyncWrapper } from "../midddleware/asyncWrapper";
 import { IRequest } from "../midddleware/auth.middleware";
 
@@ -64,11 +64,11 @@ export class InventoryController {
 
   static ratings = asyncWrapper(async (req: IRequest, res: Response) => {
     const productId = req.params.productId;
-    const objectId = new mongoose.Types.ObjectId(productId);
     const userId = req.user.id;
+    const objId = new Types.ObjectId(productId);
     const { rating, comment } = req.body;
     const response = await productService.rating(
-      objectId,
+      objId,
       userId,
       rating,
       comment

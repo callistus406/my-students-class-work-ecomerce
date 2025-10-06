@@ -5,6 +5,8 @@ import { otpModel } from "../models/otp.model";
 import { IPreRegister } from "../interface/user.interface";
 import { throwCustomError } from "../midddleware/errorHandler.midleware";
 import { customerModel } from "../models/customer.model";
+import { uploadModel } from "../models/upload.model copy";
+import { IUpload } from "../interface/upload.interface";
 
 export class UserRepository {
   static createUser = async (user: IPreRegister) => {
@@ -67,11 +69,12 @@ export class UserRepository {
     return user;
   };
 
-  static async findUserById(userId: Types.ObjectId) {
+  static async findUserById(userId: Types.ObjectId): Promise<any> {
     const response = await userModel.findById({ _id: userId });
-    if (!Types.ObjectId.isValid(userId)) {
-      throw throwCustomError("Invalid User ID", 406);
-    }
+    if (!response) return null;
+    // if (!Types.ObjectId.isValid(id)) {
+    //   throw throwCustomError("Invalid User ID", 406);
+    // }
     return response;
   }
   static saveOtp = async (email: string, otp: string) => {
@@ -127,18 +130,46 @@ export class UserRepository {
 
   //Update Password
   static updatePassword = async (
-    id: Types.ObjectId,
-    updateData: any
-  ): Promise<any> => {
-    const response = await userModel.findOneAndUpdate(id, updateData, {
+    // id: Types.ObjectId,
+    filter: any,
+    update: any
+  ) => {
+    const response = await userModel.findByIdAndUpdate(filter, update, {
       new: true,
     });
     if (!response) return null;
     return response;
   };
 
-  static updateProfile = async (id: Types.ObjectId, user: any) => {
-    const response = await userModel.findOneAndUpdate(id, user, { new: true });
+  static updateProfile = async (
+    id: Types.ObjectId,
+    update: {
+      firstName: string;
+      lastName: string;
+      imageFile?: string | undefined;
+    }
+  ): Promise<any> => {
+    const response = await userModel.findOneAndUpdate(id, update, {
+      new: true,
+    });
+
+    if (!response) return null;
+    return response;
+  };
+
+  static profilePicture = async (path?: string): Promise<any> => {
+    const response = await uploadModel.create({
+      filePath: path,
+    });
+    if (!response) return null;
+    return response;
+  };
+
+  static picture = async (upload: IUpload) => {
+    const response = await uploadModel.create({
+      userId: upload.userId,
+      filePath: upload.filePath,
+    });
     if (!response) return null;
     return response;
   };
@@ -160,25 +191,6 @@ export class UserRepository {
         is_verified: true,
       },
       { new: true }
-    );
-    if (!response) return null;
-    return response;
-  }
-
-  static async deleteRole(userId: Types.ObjectId) {
-    const record = await customerModel.findByIdAndDelete({ __id: userId });
-    if (!record) return null;
-    return record;
-  }
-
-  //====================|| UPGRADE TO CUSTOMER OR MERCHANT ||==================
-  static async upgradeRole(userId: Types.ObjectId, role: string): Promise<any> {
-    const response = await userModel.findByIdAndUpdate(
-      userId,
-      { role },
-      {
-        new: true,
-      }
     );
     if (!response) return null;
     return response;
