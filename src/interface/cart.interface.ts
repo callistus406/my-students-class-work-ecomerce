@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 
 export interface CartItem {
   productId: Types.ObjectId;
-  merchantId: Types.ObjectId;
+  merchantId: Types.ObjectId | string;
   productName: string;
   unitPrice: number;
   quantity: number;
@@ -10,10 +10,9 @@ export interface CartItem {
 }
 
 export interface Cart {
-  items: CartItem[];
+  productId: string;
+  quantity: number;
   couponCode?: string;
-  currency: string;
-  totalPrice: number;
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -1,8 +1,10 @@
 import mongoose, { Schema } from "mongoose";
+import { ref } from "process";
 
 export const productSchema = new Schema(
   {
     productName: { type: String, required: true },
+    productId: { type: String, required: true, ref: "Product", unique: true },
     slug: { type: String, required: true, unique: true, index: true },
     description: { type: String, required: false },
     price: { type: Number, required: true },
