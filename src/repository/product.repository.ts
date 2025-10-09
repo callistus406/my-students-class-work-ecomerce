@@ -8,7 +8,7 @@ import mongoose from "mongoose";
 
 export class productRepository {
   static findById =  async (id: mongoose.Types.ObjectId) => {
-    const res = productModel.findById(id).lean();
+    const res = await productModel.findById(id).lean();
     if (!res) return null;
     return res;
   };
