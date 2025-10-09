@@ -7,14 +7,7 @@ import crypto from "crypto";
 import { otpModel } from "../models/otp.model";
 import { JWT_SECRET, JWT_EXP, JWT_ADMIN_KEY } from "../config/system.variable";
 import { UserRepository } from "../repository/user.repository";
-import {
-  loginValidate,
-  preValidate,
-  userValidate,
-  kycValidate,
-  updatePwd,
-  profileSchema,
-} from "../validation/user.validate";
+import {loginValidate,preValidate,userValidate,kycValidate,updatePwd,profileSchema} from "../validation/user.validate";
 import { IPreRegister, IVerifyUser } from "../interface/user.interface";
 import { throwCustomError } from "../midddleware/errorHandler.midleware";
 import { sendMail } from "../utils/nodemailer";
@@ -57,16 +50,16 @@ export class UserService {
     if (!response) throw throwCustomError("Unable to create account", 500);
 
     // gen role
-    if (response.role === "customer") {
+    if (response.role === "customer") {  
       const role = await CustomerRepository.createCustomer(response._id);
       if (!role) {
-        throw throwCustomError("Unable to create a Customer account", 423);
+        throw throwCustomError("Unable to create a Customer account", 500);
       }
     }
     if (response.role === "merchant") {
       const merchantRole = MerchantRepository.createMerchant(response._id);
       if (!merchantRole) {
-        throw throwCustomError("Unable to create a Merchant account", 423);
+        throw throwCustomError("Unable to create a Merchant account", 500);
       }
     }
 
@@ -178,6 +171,7 @@ export class UserService {
     if (!user) throw throwCustomError("User not found", 404);
 
     const otp = await UserService.generateOtp(email);
+    console.log("do not share with anyone", otp);
 
     if (!otp) throw throwCustomError("Unable to generate OTP", 500);
 

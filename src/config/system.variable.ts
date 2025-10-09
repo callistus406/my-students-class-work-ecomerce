@@ -6,4 +6,5 @@ export const JWT_SECRET = process.env.JWT_SECRET as string;
 export const PORT = process.env.PORT 
 export const JWT_EXP = process.env.JWT_EXP
 export const JWT_ADMIN_KEY = process.env.JWT_ADMIN_KEY
+export const API_KEY = process.env.API_KEY
 

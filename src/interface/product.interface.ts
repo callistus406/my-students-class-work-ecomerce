@@ -6,7 +6,7 @@ export interface IProduct {
   description?: string;
   price: number;
   discountPrice?: number;
-  currency: string;
+  currency?: string;
   stock: number;
   quantity: number;
   sku?: string;
