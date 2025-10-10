@@ -437,7 +437,7 @@ export class UserService {
     }
     //validate user
     const user = await UserRepository.findUserById(id);
-    console.log("user is:", user);
+
     if (!id) {
       throw throwCustomError("No user found", 422);
     }
