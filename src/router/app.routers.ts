@@ -6,6 +6,7 @@ import { PaystackController } from "../controller/paystack.controller";
 import { InventoryController } from "../controller/inventory.controller";
 import { UserController } from "../controller/user.controller";
 import { upload } from "../config/multer.config";
+import { CstController } from "../controller/customer.controller";
 
 const router = express.Router();
 //authentication
@@ -27,23 +28,17 @@ router.post(
 router.post("/auth/reset-password", AuthController.resetPassword);
 
 //users
+
 router.patch(
   "/profile/update",
   upload.single("image") as any,
   authMiddleware as any,
-  UserController.updateProfile
+  UserController.profileUpdate
 );
 router.patch(
   "/profile/password/update",
   authMiddleware as any,
   UserController.changePassword
-);
-
-router.post(
-  "/upload",
-  upload.single("file") as any,
-  authMiddleware as any,
-  UserController.updatePicture
 );
 // paystack
 router.post("/paystack/payment", PaystackController.initiatePayment as any);
@@ -52,6 +47,9 @@ router.post(
   "/paystack/callback",
   PaystackController.handleCallback.bind(PaystackController)
 );
+
+//customers
+router.get("/fetch/customer/:id", CstController.fetchCustomers);
 
 // inventory route section
 router.post("/inventory/products", InventoryController.createProduct);

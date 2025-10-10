@@ -59,8 +59,8 @@ export class UserRepository {
   static getUser = async (userId: Types.ObjectId) => {
     const users = await userModel
       .findOne({ _id: userId })
-      .select("-password,-__v")
-      .lean();
+      .select("-password -__v");
+    if (!users) return null;
     return users;
   };
 
@@ -141,6 +141,13 @@ export class UserRepository {
     return response;
   };
 
+  static profileUpdate = async (id: Types.ObjectId, update: any) => {
+    const response = await userModel.findByIdAndUpdate(id, update, {
+      new: true,
+    });
+    if (!response) return null;
+    return response;
+  };
   static updateProfile = async (
     id: Types.ObjectId,
     update: {
@@ -165,7 +172,7 @@ export class UserRepository {
     return response;
   };
 
-  static picture = async (upload: IUpload) => {
+  static picture = async (upload: IUpload): Promise<any> => {
     const response = await uploadModel.create({
       userId: upload.userId,
       filePath: upload.filePath,

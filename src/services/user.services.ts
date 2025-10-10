@@ -26,6 +26,7 @@ import { MerchantRepository } from "../repository/merchant-repository";
 import { IEncrypt } from "../interface/encrypt-interface";
 import { Multer } from "multer";
 import { uploadModel } from "../models/upload.model copy";
+import path from "node:path";
 
 export class UserService {
   static preRegister = async (user: IPreRegister) => {
@@ -35,6 +36,9 @@ export class UserService {
     if (error) {
       throw throwCustomError(error.message, 422);
     }
+    user.firstName = user.firstName.toLowerCase();
+    user.lastName = user.lastName.toLowerCase();
+    user.email = user.email.toLowerCase();
 
     // check if user exists
     const isFound = await UserRepository.findUserByEmail(user.email);
@@ -254,6 +258,8 @@ export class UserService {
     if (error) {
       throw throwCustomError(error.message, 422);
     }
+
+    email = email.toLowerCase();
     //check if user exist
     const user = await UserRepository.findUserByEmail(email);
 
@@ -416,100 +422,82 @@ export class UserService {
     await user.save();
     return "Password has been Updated";
   };
-  //update Profile
-  static updateProfile = async (
-    userId: Types.ObjectId,
+  // profile update
+  static profileUpdate = async (
+    id: Types.ObjectId,
     password: string,
-    update: {
-      firstName: string;
-      lastName: string;
-    },
-    path?: string
+    update: any,
+    updated: any,
+    path: string | undefined
   ) => {
-    //validate update
-    const { error } = profileSchema.validate(update);
+    //validate fields
+    const { error } = profileSchema.validate(update, updated);
     if (error) {
       throw throwCustomError(error.message, 422);
     }
-    //check user auth
-    const user = await UserRepository.findUserById(userId);
-    if (!user) {
-      throw throwCustomError("No user Found", 422);
+    //validate user
+    const user = await UserRepository.findUserById(id);
+    console.log("user is:", user);
+    if (!id) {
+      throw throwCustomError("No user found", 422);
     }
-    //compare password for authenticatiob
-    const isPwdValid = await bcrypt.compare(password, user.password);
-    if (!isPwdValid) {
-      throw throwCustomError("Incorrect password", 422);
+    //password authentication
+    const isPwdAuth = await bcrypt.compare(password, user.password);
+    if (!isPwdAuth) {
+      throw throwCustomError("Enter the correct password", 422);
+    }
+    if (user) {
+      const { error } = profileSchema.validate(updated);
+      if (error) {
+        throw throwCustomError(error.message, 422);
+      }
+
+      //check the role of the user
+      if (user.role === "customer") {
+        //find the customer account of the user
+        const userId = await CustomerRepository.findCustomer(id);
+        if (userId) {
+          throw throwCustomError("Invalid user", 422);
+        }
+        //update customer
+        const user = await CustomerRepository.update(userId, updated);
+        if (!user) {
+          throw throwCustomError("Unable to update customer profile", 422);
+        }
+      }
+      //check the role of the user
+      if (user.role === "merchant") {
+        //find the merchant account of the user
+        const userId = await MerchantRepository.findMerchant(id);
+        if (!userId) {
+          throw throwCustomError("Invalid user", 422);
+        }
+        //update merchant
+        const user = await MerchantRepository.update(userId, updated);
+        if (!user) {
+          throw throwCustomError("Unable to update merchant profile", 422);
+        }
+      }
     }
 
-    const newPayload: {
-      firstName: string;
-      lastName: string;
-      imageUrl?: string;
-    } = { ...update };
+    //profile should be updated
+    const response = await UserRepository.profileUpdate(id, update);
+    if (!response) {
+      throw throwCustomError("Unable to save changes", 422);
+    }
+    //image optional
     if (path) {
-      newPayload.imageUrl = path;
-      // const domain = `http://localhost:8080/uploads/${path}`;
-      // const res = await UserRepository.picture({
-      //   userId: user._id,
-      //   filePath: domain,
-      // });
-      // if (!res) {
-      //   throw throwCustomError("unable to upload profile picture", 422);
-      // }
+      const domain = `http://localhost:8080/uploads/${path}`;
+      const res = await UserRepository.picture({
+        userId: user.id,
+        filePath: domain,
+      });
     }
-    // let upload;
-    // upload = `http://localhost:8080/uploads/${path}`;
-    // const res = await UserRepository.picture({
-    //   userId: user._id,
-    //   filePath: upload,
-    // });
-    // if (!res) {
-    //   throw throwCustomError("unable to upload profile picture", 422);
-    // }
 
-    // const image = path ? upload : undefined;
-    // if (!image) {
-    //   throw throwCustomError("unable to perform task", 402);
-    // }
-    // console.log(image);
-    // const payload = { ...update, image };
-    // console.log("payload", payload);
-
-    // if (path) {
-    //   const domain = `http://localhost:8080/uploads/${path}`;
-    //   const res = await UserRepository.picture({
-    //     userId: user._id,
-    //     filePath: domain,
-    //   });
-    //   if (!res) {
-    //     throw throwCustomError("unable to upload profile picture", 422);
-    //   }
-    // }
-
-    const response = await UserRepository.updateProfile(userId, newPayload);
-    if (!response) {
-      throw throwCustomError("Unable to update Profile", 422);
-    }
     return {
-      firstName: response.firstName,
-      lastName: response.lastName,
-      filePath: `http://localhost:8080/uploads/${path}`,
+      message: "Profile updated",
+      filePath: path,
     };
-  };
-
-  // static updatePicture = async(user,)
-  static profilePicture = async (userId: Types.ObjectId, path: string) => {
-    const user = await UserRepository.findUserById(userId);
-    if (!user) {
-      throw throwCustomError("Invalid User", 422);
-    }
-    const domain = `http://localhost:8080/uploads/${path}`;
-    const response = await UserRepository.profilePicture(domain);
-    if (!response) {
-      throw throwCustomError("Unable to upload profile picture", 422);
-    }
-    return response;
   };
 
   //===================|| ENCRYPT ||=========================== //

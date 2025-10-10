@@ -3,8 +3,6 @@ import mongoose, { Schema, Types } from "mongoose";
 const customerSchema = new Schema(
   {
     userId: { type: Types.ObjectId, require: true, unique: true, ref: "User" },
-    firstName: { type: String, require: true },
-    lastName: { type: String, require: true },
     phoneNumber: {
       type: Number,
       require: true,
@@ -12,7 +10,7 @@ const customerSchema = new Schema(
         phone_number: { $exist: true, $ne: null },
       },
     },
-    addresses: {
+    address: {
       label: { type: String },
       street: { type: String, require: true },
       city: { type: String, require: true },
