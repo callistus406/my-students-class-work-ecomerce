@@ -456,7 +456,7 @@ export class UserService {
       if (user.role === "customer") {
         //find the customer account of the user
         const userId = await CustomerRepository.findCustomer(id);
-        if (userId) {
+        if (!userId) {
           throw throwCustomError("Invalid user", 422);
         }
         //update customer

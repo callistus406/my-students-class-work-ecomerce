@@ -48,9 +48,6 @@ router.post(
   PaystackController.handleCallback.bind(PaystackController)
 );
 
-//customers
-router.get("/fetch/customer/:id", CstController.fetchCustomers);
-
 // inventory route section
 router.post("/inventory/products", InventoryController.createProduct);
 router.get("/inventory/products", InventoryController.getProducts);
