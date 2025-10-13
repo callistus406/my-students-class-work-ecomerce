@@ -6,7 +6,6 @@ import { PaystackController } from "../controller/paystack.controller";
 import { InventoryController } from "../controller/inventory.controller";
 import { UserController } from "../controller/user.controller";
 import { upload } from "../config/multer.config";
-import { CstController } from "../controller/customer.controller";
 
 const router = express.Router();
 //authentication
