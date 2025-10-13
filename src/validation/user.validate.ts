@@ -34,6 +34,13 @@ export const kycValidate = Joi.object({
   bvn: Joi.string().length(11).required(),
 });
 
+export const resetValidate = Joi.object({
+  email: Joi.string().email().required(),
+  otp: Joi.string().required(),
+  newPassword: Joi.string()
+    .required()
+});
+
 export const profileSchema = Joi.object({
   firstName: Joi.string().required(),
   lastName: Joi.string().required(),

@@ -7,7 +7,7 @@ import crypto from "crypto";
 import { otpModel } from "../models/otp.model";
 import { JWT_SECRET, JWT_EXP, JWT_ADMIN_KEY } from "../config/system.variable";
 import { UserRepository } from "../repository/user.repository";
-import {loginValidate,preValidate,userValidate,kycValidate,updatePwd,profileSchema} from "../validation/user.validate";
+import {loginValidate,preValidate,userValidate,kycValidate,updatePwd,profileSchema,resetValidate} from "../validation/user.validate";
 import { IPreRegister, IVerifyUser } from "../interface/user.interface";
 import { throwCustomError } from "../midddleware/errorHandler.midleware";
 import { sendMail } from "../utils/nodemailer";
@@ -69,8 +69,12 @@ export class UserService {
       throw throwCustomError("OTP generation failed", 400);
     }
     //hash otp
+    const hashedOtp = await bcrypt.hash(otp.toString(), 2);
+    if (!hashedOtp) {
+      throw throwCustomError("OTP hashing failed", 500);
+    }
     // save otp
-    const saveOtp = await UserRepository.saveOtp(user.email, otp.toString());
+    const saveOtp = await UserRepository.saveOtp(user.email, hashedOtp);
 
     if (!saveOtp) {
       return "Account created, Successfully, please request for OTP to continue";
@@ -126,6 +130,10 @@ export class UserService {
   };
 
   static async generateOtp(email: string) {
+    const {error} = userValidate.validate({email});
+    if (error) {
+      throw throwCustomError(error.message, 422);
+    }
     const otp = crypto.randomInt(100000, 999999);
     await otpModel.create({ email, otp });
     const savedOtp = await UserRepository.saveOtp(email, otp.toString());
@@ -138,6 +146,10 @@ export class UserService {
 
   // request otp
   static requestOtp = async (email: string) => {
+    const {error} = userValidate.validate({email});
+    if (error) {
+      throw throwCustomError(error.message, 422);
+    }
     if (!email) throw throwCustomError("Email is required", 400);
     const user = await UserRepository.findUserByEmail(email);
     if (!user) throw throwCustomError("User not found", 404);
@@ -165,6 +177,10 @@ export class UserService {
 
   static requestPasswordReset = async (email: string) => {
     //TODO: use joi for validation
+    const {error} = userValidate.validate({email});
+    if (error) {
+      throw throwCustomError(error.message, 422);
+    }
     if (!email) throw throwCustomError("Email is required", 400);
 
     const user = await UserRepository.findUserByEmail(email);
@@ -196,14 +212,10 @@ export class UserService {
 
   //reset password
 
-  static resetPassword = async (
-    email: string,
-    otp: string,
-
-    newPassword: string
-  ) => {
-    if (!email || !otp || !newPassword) {
-      throw throwCustomError("All fields are required", 400);
+  static resetPassword = async ( email: string, otp: string,newPassword: string) => {
+    const {error} = resetValidate.validate({email, otp, newPassword});
+    if (error) {
+      throw throwCustomError(error.message, 422);
     }
 
     const isOtpValid = await UserRepository.otpVerify(email, otp);
@@ -229,7 +241,6 @@ export class UserService {
   };
 
   static getUser = async (userId: Types.ObjectId) => {
-    // const objectId = new mongoose.Types.ObjectId(userId)
     const response = await UserRepository.getUserById(userId);
     if (!response) {
       throw throwCustomError("unable to perform operation", 422);
