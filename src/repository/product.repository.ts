@@ -3,12 +3,11 @@ import { IReview } from "../interface/review.interface";
 import { productModel } from "../models/product.model";
 import { Types } from "mongoose";
 import { reviewModel } from "../models/review.model";
-import { Cart,CartItem } from "../interface/cart.interface";
-import mongoose from "mongoose";
+import { Cart, CartItem } from "../interface/cart.interface";
 
 export class productRepository {
-  static findById =  async (id: mongoose.Types.ObjectId) => {
-    const res = await productModel.findById(id).lean();
+  static findById = async (data: CartItem) => {
+    const res = productModel.findById(data).lean();
     if (!res) return null;
     return res;
   };

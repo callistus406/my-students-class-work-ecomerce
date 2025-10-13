@@ -4,18 +4,13 @@ import { ref } from "process";
 export const productSchema = new Schema(
   {
     productName: { type: String, required: true },
-    productId: { type: String, required: true, ref: "Product", unique: true },
     slug: { type: String, required: true, unique: true, index: true },
     description: { type: String, required: false },
     price: { type: Number, required: true },
     discountPrice: { type: Number, required: false },
-    currency: { type: String, required: true },
-    stock: { type: Number, required: true },
     quantity: { type: Number, required: true },
-    avgRating: { type: Number, default: 0, max: 5 },
-    sku: { type: String, unique: true },
+    sku: { type: String },
     images: [{ type: String }],
-    tags: [{ type: String }],
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }

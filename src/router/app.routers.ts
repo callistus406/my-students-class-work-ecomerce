@@ -1,5 +1,9 @@
 import express from "express";
-import { authMiddleware } from "../midddleware/auth.middleware";
+import {
+  authMiddleware,
+  customerMiddleware,
+  merchantMiddleware,
+} from "../midddleware/auth.middleware";
 import { AuthController } from "../controller/auth.controller";
 import { MarketplaceController } from "../controller/marketplace.controller";
 import { PaystackController } from "../controller/paystack.controller";
@@ -27,23 +31,17 @@ router.post(
 router.post("/auth/reset-password", AuthController.resetPassword);
 
 //users
+
 router.patch(
   "/profile/update",
   upload.single("image") as any,
   authMiddleware as any,
-  UserController.updateProfile
+  UserController.profileUpdate
 );
 router.patch(
   "/profile/password/update",
   authMiddleware as any,
   UserController.changePassword
-);
-
-router.post(
-  "/upload",
-  upload.single("file") as any,
-  authMiddleware as any,
-  UserController.updatePicture
 );
 // paystack
 router.post("/paystack/payment", PaystackController.initiatePayment as any);
@@ -54,13 +52,25 @@ router.post(
 );
 
 // inventory route section
-router.post("/inventory/products", InventoryController.createProduct);
+router.post(
+  "/inventory/products",
+  authMiddleware as any,
+  merchantMiddleware as any,
+  upload.any() as any,
+  InventoryController.createProduct
+);
 router.get("/inventory/products", InventoryController.getProducts);
 router.get("/inventory/products/:id", InventoryController.findById);
-router.delete("/inventory/products/:id", InventoryController.deleteProduct);
+router.delete(
+  "/inventory/products/:id",
+  authMiddleware as any,
+  merchantMiddleware as any,
+  InventoryController.deleteProduct
+);
 router.post(
   "/inventory/product/rating",
   authMiddleware as any,
+  customerMiddleware as any,
   InventoryController.ratings
 );
 router.post("/cart/create", MarketplaceController.createCart as any);

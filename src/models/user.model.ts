@@ -1,5 +1,9 @@
 import mongoose, { Schema, Types } from "mongoose";
 
+export enum USER_TYPE {
+  CUSTOMER = "customer",
+  MERCHANT = "merchant",
+}
 export const userSchema = new Schema({
   firstName: { type: String, require: true },
   lastName: { type: String, require: true },
@@ -10,8 +14,8 @@ export const userSchema = new Schema({
     enum: ["customer", "merchant"],
   },
   otp: { type: String, require: true },
-  date_of_birth: {
-    type: Date,
+  dateOfBirth: {
+    type: String,
   },
   nin: {
     type: String,

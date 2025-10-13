@@ -1,10 +1,11 @@
 import Joi from "joi";
 
 export const preValidate = Joi.object({
-  firstName: Joi.string().min(2).max(30).required(),
-  lastName: Joi.string().min(2).max(30).required(),
+  firstName: Joi.string().min(2).max(30).required().trim(),
+  lastName: Joi.string().min(2).max(30).required().trim(),
   email: Joi.string().email().required(),
   password: Joi.string()
+    .trim()
     .min(8)
     .pattern(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>]).+$/
@@ -15,7 +16,7 @@ export const preValidate = Joi.object({
       "string.min": "Password must be at least 7 characters",
     })
     .required(),
-  role: Joi.string().required(),
+  role: Joi.string().valid("customer", "merchant").required().trim(),
 });
 
 export const userValidate = Joi.object({
@@ -42,13 +43,18 @@ export const resetValidate = Joi.object({
 });
 
 export const profileSchema = Joi.object({
-  firstName: Joi.string().required(),
-  lastName: Joi.string().required(),
+  firstName: Joi.string().optional().trim().min(2),
+  lastName: Joi.string().optional().min(2).trim(),
+  displayName: Joi.string().optional().min(2),
+  address: Joi.string().optional().min(5),
+  phoneNumber: Joi.string().optional().min(11),
+
   path: Joi.string().optional(),
 });
 
 export const updatePwd = Joi.object({
   password: Joi.string()
+    .trim()
     .required()
     .min(8)
     .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$^&*)(=+|)]).+$/)
@@ -59,6 +65,7 @@ export const updatePwd = Joi.object({
     }),
   confirmPassword: Joi.string()
     .required()
+    .trim()
     .min(8)
     .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$^&*)(=+|)]).+$/)
     .messages({

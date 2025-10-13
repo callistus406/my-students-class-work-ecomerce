@@ -21,31 +21,19 @@ export class UserController {
     const response = await UserService.updatePassword(userId, password, update);
     res.status(200).json({ success: true, payload: response });
   });
-  // //   update profile
-  static updateProfile = asyncWrapper(async (req: IRequest, res: Response) => {
-    const userId = req.user.id;
-    const { password, update } = req.body;
-    const path = req.file?.originalname;
-    if (!path) return null;
-    try {
-      const response = await UserService.updateProfile(
-        userId,
-        password,
-        update,
-        path
-      );
-      res.status(200).json({ success: true, payload: response });
-    } catch (error: any) {
-      res.status(400).json({ success: true, message: error });
-    }
-  });
 
-  //   upate profile picture
-  static updatePicture = asyncWrapper(async (req: IRequest, res: Response) => {
-    const userId = req.user.id;
+  //profile updated
+  static profileUpdate = asyncWrapper(async (req: IRequest, res: Response) => {
+    const id = req.user.id;
+    const { password, update, updated } = req.body;
     const path = req.file?.originalname;
-    if (!path) return "No file uploaded";
-    const response = await UserService.profilePicture(userId, path);
+    const response = await UserService.profileUpdate(
+      id,
+      password,
+      update,
+      updated,
+      path
+    );
     res.status(200).json({ success: true, payload: response });
   });
 }

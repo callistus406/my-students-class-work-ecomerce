@@ -10,7 +10,6 @@ const merchantSchema = new Schema({
   bio: { type: String },
   logoUrl: { type: String },
   email: { type: String },
-  phone: { type: Number },
   address: {
     label: { type: String, require: true },
     street: { type: String, require: true },
