@@ -13,22 +13,25 @@ export class productService {
     if (!id) {
       throw throwCustomError("id is required", 422);
     }
-    const response = await productRepository.findById(id);
-    return response;
+    // const response = await productRepository.findById(id);
+    return "response";
   };
   // product creation service
 
-  static createProduct = async (data: IProduct) => {
+  static createProduct = async (data: IProduct, files: any) => {
     const { error } = productValidate.validate(data);
     if (error) {
       throw throwCustomError(error.message, 422);
     }
 
+    console.log("=======");
+    console.log(files);
+    if (files?.length === 0) throw throwCustomError("images are required", 422);
+    let images = files.map((item: any) => `http://localhost:3000/${item.path}`);
+
     if (data.price <= 0)
       throw throwCustomError("Price must be greater than 0", 400);
 
-    if (data.stock < 1)
-      throw throwCustomError("Stock should be greater or equal to 1", 400);
     // add discount logic
     // determine the % from the discount
     // discount most be less than the actual price
@@ -36,14 +39,17 @@ export class productService {
     //generate slug from product name
 
     const slug = data.productName.toLowerCase().trim().replace(/\s+/g, "-");
-    data.slug = slug;
 
     //check if the product exist
 
     const isFound = await productRepository.findProductBySlug(slug);
     if (isFound) throw throwCustomError("Product exists", 409);
 
-    const response = await productRepository.createProduct(data);
+    const response = await productRepository.createProduct({
+      ...data,
+      slug,
+      images,
+    });
 
     if (!response) {
       throw throwCustomError("Product not created", 500);

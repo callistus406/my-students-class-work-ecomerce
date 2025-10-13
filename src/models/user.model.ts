@@ -1,5 +1,9 @@
 import mongoose, { Schema, Types } from "mongoose";
 
+export enum USER_TYPE {
+  CUSTOMER = "customer",
+  MERCHANT = "merchant",
+}
 export const userSchema = new Schema({
   firstName: { type: String, require: true },
   lastName: { type: String, require: true },

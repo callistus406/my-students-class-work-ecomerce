@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { Types } from "mongoose";
-import { userModel } from "../models/user.model";
+import { USER_TYPE, userModel } from "../models/user.model";
 import { JWT_SECRET } from "../config/system.variable";
 
 export interface IRequest extends Request {
@@ -9,6 +9,7 @@ export interface IRequest extends Request {
     id: Types.ObjectId;
     email: string;
     is_verified?: boolean;
+    userType: string;
   };
 }
 
@@ -34,7 +35,43 @@ export const authMiddleware = (
       email: user.email as string,
       id: user._id,
       is_verified: user.is_verified,
+      userType: data.userType,
     };
     next();
   });
+};
+
+export const customerMiddleware = (
+  req: IRequest,
+  res: Response,
+  next: NextFunction
+): any => {
+  const user = req.user;
+  if (!user) return res.sendStatus(403);
+
+  if (user.userType !== USER_TYPE.CUSTOMER)
+    return res
+      .status(403)
+      .json({ payload: "You are not authorized to access this resource" });
+
+  next();
+};
+
+export const merchantMiddleware = (
+  req: IRequest,
+  res: Response,
+  next: NextFunction
+): any => {
+  const user = req.user;
+  if (!user) return res.sendStatus(403);
+
+  if (user.userType !== USER_TYPE.MERCHANT)
+    return res
+      .status(403)
+      .json({
+        status: false,
+        payload: "You are not authorized to access this resource",
+      });
+
+  next();
 };

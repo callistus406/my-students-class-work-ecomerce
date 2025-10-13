@@ -34,6 +34,8 @@ import { IEncrypt } from "../interface/encrypt-interface";
 import { Multer } from "multer";
 import { uploadModel } from "../models/upload.model copy";
 import path from "node:path";
+import { customerModel } from "../models/customer.model";
+import { USER_TYPE } from "../models/user.model";
 
 // const algorithm = "aes-256-cbc";
 // const key = crypto.randomBytes(32);
@@ -281,8 +283,11 @@ export class UserService {
     const user = await UserRepository.findUserByEmail(email);
 
     if (!user) {
-      throw throwCustomError("user does not exist", 429);
+      throw throwCustomError("Invalid credentials", 401);
     }
+
+    //fetch account tyfrom eith customer or merchant
+
     //check password validity
     const hashedPassword = await bcrypt.compare(
       password,
@@ -293,6 +298,7 @@ export class UserService {
 
     const payload = {
       userId: user._id,
+      userType: user.role,
     };
 
     let jwtKey = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXP } as any);
@@ -312,7 +318,7 @@ export class UserService {
       confirmationTemplate
     );
     return {
-      message: `Dear ${user.firstName}, You've successfully Loggedin`,
+      message: `Login Sucessful`,
       authKey: jwtKey,
     };
   };
