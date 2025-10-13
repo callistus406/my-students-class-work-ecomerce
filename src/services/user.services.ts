@@ -5,7 +5,14 @@ import { scrypt, randomFill, createCipheriv } from "node:crypto";
 import { promisify } from "node:util";
 import crypto from "crypto";
 import { otpModel } from "../models/otp.model";
-import { JWT_SECRET, JWT_EXP, JWT_ADMIN_KEY } from "../config/system.variable";
+import {
+  JWT_SECRET,
+  JWT_EXP,
+  JWT_ADMIN_KEY,
+  algorithm,
+  key,
+  iv,
+} from "../config/system.variable";
 import { UserRepository } from "../repository/user.repository";
 import {
   loginValidate,
@@ -27,6 +34,16 @@ import { IEncrypt } from "../interface/encrypt-interface";
 import { Multer } from "multer";
 import { uploadModel } from "../models/upload.model copy";
 import path from "node:path";
+
+// const algorithm = "aes-256-cbc";
+// const key = crypto.randomBytes(32);
+// const iv = crypto.randomBytes(16);
+
+// const keyBase64 = key.toString("base64");
+// const ivBase64 = iv.toString("base64");
+
+// console.log(`keyBase64: ${keyBase64}`);
+// console.log(`ivBase64: ${ivBase64}`);
 
 export class UserService {
   static preRegister = async (user: IPreRegister) => {
@@ -361,6 +378,7 @@ export class UserService {
     }
     //Encrypt Nin
     const encrypt = await UserService.encryptData(data.nin);
+
     if (!encrypt) {
       throw throwCustomError("unable to encrypt file", 422);
     }
@@ -377,7 +395,7 @@ export class UserService {
 
     // Encrypt Bvn
     const encryptBvn = await UserService.encryptData(data.bvn);
-    if (!encrypt) {
+    if (!encryptBvn) {
       throw throwCustomError("unable to encrypt file", 422);
     }
 
@@ -390,6 +408,11 @@ export class UserService {
     if (!validate) {
       throw throwCustomError("Unable to verify KYC", 422);
     }
+    // const encrypt = validate.nin;
+    // console.log("encrypt", encrypt);
+    // const decrypt = await UserService.decryptData(encrypt as any);
+    // console.log("decrypt", decrypt);
+    // console.log("validate nin:", validate.nin);
     return `Your ${user.role.toUpperCase()} account has been Verified`;
   }
   //Update password
@@ -500,15 +523,18 @@ export class UserService {
     };
   };
 
-  //===================|| ENCRYPT ||=========================== //
-  static encryptData = async (text: string) => {
-    const algorithm = "aes-256-cbc";
-    const key = crypto.randomBytes(32);
-    const iv = crypto.randomBytes(16);
+  //===================|| ENCRYPT  & DECRYPT||=========================== //
 
+  static encryptData = async (text: string) => {
     const cipher = crypto.createCipheriv(algorithm, key, iv);
-    let encrypted = cipher.update(text, "utf-8", "hex");
+    let encrypted = cipher.update(text, "utf8", "hex");
     encrypted += cipher.final("hex");
     return encrypted;
+  };
+  static decryptData = async (encrypted: string): Promise<any> => {
+    const decipher = crypto.createDecipheriv(algorithm, key, iv);
+    let decrypted = decipher.update(encrypted, "hex", "utf8");
+    decrypted += decipher.final("utf8");
+    return decrypted;
   };
 }
