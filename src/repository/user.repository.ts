@@ -65,7 +65,8 @@ export class UserRepository {
   };
 
   static findUserByEmail = async (email: string) => {
-    const user = await userModel.findOne({ email }).select("-__v");
+    const user = await userModel.findOne({ email });
+
     return user;
   };
 

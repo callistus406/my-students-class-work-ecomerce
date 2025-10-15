@@ -7,8 +7,8 @@ import { IRequest } from "../midddleware/auth.middleware";
 export class InventoryController {
   // product creation controller
   static createProduct = asyncWrapper(async (req: Request, res: Response) => {
-    const data = req.body.data;
-    const response = await productService.createProduct(data);
+    const data = req.body;
+    const response = await productService.createProduct(data, req.files);
     res.status(200).json({ success: true, payload: response });
   });
 

@@ -18,6 +18,7 @@ export class CustomerRepository {
     if (!response) return null;
     return response;
   };
+
   static getCustomers = async (userid: Types.ObjectId) => {
     const response = await customerModel
       .find()
