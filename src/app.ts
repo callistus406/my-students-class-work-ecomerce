@@ -12,7 +12,7 @@ const app = express();
 app.use(express.json());
 
 // app.use(logger)
-app.use(express.static(path.join(__dirname, "../uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use("/api/v1", router);
 app.use(handleCustomError);
 
