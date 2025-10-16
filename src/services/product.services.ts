@@ -9,6 +9,7 @@ import {
 } from "../validation/product.validate";
 import { reviewModel } from "../models/review.model";
 export class productService {
+
   static findById = async (id: Types.ObjectId) => {
     if (!id) {
       throw throwCustomError("id is required", 422);
@@ -33,11 +34,18 @@ export class productService {
       throw throwCustomError("Price must be greater than 0", 400);
 
     // add discount logic
+    const discount = data.discountPrice
+      ? ((data.price - data.discountPrice) / data.price) * 100
+      : 0;
+    console.log(discount);
     // determine the % from the discount
     // discount most be less than the actual price
-
+    if (data.discountPrice) {
+      if (data.discountPrice >= data.price) {
+        throw throwCustomError("Discount must be less than the price", 400);
+      }
+    }
     //generate slug from product name
-
     const slug = data.productName.toLowerCase().trim().replace(/\s+/g, "-");
 
     //check if the product exist
@@ -49,6 +57,7 @@ export class productService {
       ...data,
       slug,
       images,
+      discountPrice:discount
     });
 
     if (!response) {
@@ -59,18 +68,18 @@ export class productService {
   };
 
   // get product
-  static async getProducts(filter?: {
+  static getProducts = async (filter?: {
     page?: string;
     limit?: string;
     search?: string;
-  }) {
+  }) => {
     let page = parseInt(filter?.page || "1", 10);
     let limit = parseInt(filter?.limit || "10", 10);
     const search = filter?.search || "";
 
     if (isNaN(page) || page < 1) page = 1;
     if (isNaN(limit) || limit < 1) limit = 10;
-    if (limit > 100) limit = 100; // prevent abuse
+    if (limit > 100) limit = 100; 
 
     return productRepository.getProducts(page, limit, search);
   }
