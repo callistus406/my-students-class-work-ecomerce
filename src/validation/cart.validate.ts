@@ -12,7 +12,6 @@ export const cartItemValidate = Joi.object({
 export const cartValidate = Joi.object({
   productId: Joi.string().required(),
   quantity: Joi.string().min(1).required(),
-  couponCode: Joi.string().optional(),
 });
 
 // productid;

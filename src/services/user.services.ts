@@ -1,8 +1,6 @@
 import mongoose, { Types } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { scrypt, randomFill, createCipheriv } from "node:crypto";
-import { promisify } from "node:util";
 import crypto from "crypto";
 import { otpModel } from "../models/otp.model";
 import {
@@ -335,11 +333,11 @@ export class UserService {
 
     const { error } = kycValidate.validate({
       dateOfBirth: data.dateOfBirth,
-      nin: data.nin,
-      bvn: data.bvn,
+      nin: nin,
+      bvn: bvn,
     });
     if (error) {
-      throw throwCustomError(error.message, 410);
+      throw throwCustomError(error.message, 422);
     }
     //check if user exist
     const user = await UserRepository.findUserById(data.userId);
@@ -347,40 +345,43 @@ export class UserService {
       throw throwCustomError("no record found", 422);
     }
     // check if user is already verified
-    if (user.is_verified) {
+    if (user.is_kyc_verified) {
       throw throwCustomError(
         `Your ${user.role.toUpperCase()} account is already verified`,
         412
       );
     }
     //call external API
-    const isUser = kycRecords.find(
-      (item) =>
-        item.firstName.toLowerCase() === user.firstName &&
-        item.lastName.toLowerCase() === user.lastName
-    );
+    // console.log(item);
+
+    const isUser = kycRecords.find((item) => {
+      return (
+        item.firstName.toLowerCase() === user.firstName.toLowerCase() &&
+        item.lastName.toLowerCase() === user.lastName.toLowerCase()
+      );
+    });
     if (!isUser) {
-      throw throwCustomError("No record found", 403);
+      throw throwCustomError("No record found", 400);
     }
     //check dateofbirth
     const isDob = kycRecords.find(
-      (x) =>
-        x.dateOfBirth === data.dateOfBirth &&
-        x.firstName.toLowerCase() === user.firstName &&
-        x.lastName.toLowerCase() === user.lastName
+      (item) =>
+        item.dateOfBirth === data.dateOfBirth &&
+        item.firstName.toLowerCase() === user.firstName?.toLowerCase() &&
+        item.lastName.toLowerCase() === user.lastName?.toLowerCase()
     );
     if (!isDob) {
-      throw throwCustomError("Invalid credentials", 403);
+      throw throwCustomError("Invalid credentials", 400);
     }
-    //check NIN authentication
+    //check NIN authenticationx
     const isNinValid = kycRecords.find(
       (result) =>
         result.nin === data.nin &&
-        result.firstName.toLowerCase() === user.firstName &&
-        result.lastName.toLowerCase() === user.lastName
+        result.firstName.toLowerCase() === user.firstName?.toLowerCase() &&
+        result.lastName.toLowerCase() === user.lastName?.toLowerCase()
     );
     if (!isNinValid) {
-      throw throwCustomError("Invalid NIN", 403);
+      throw throwCustomError("Invalid NIN", 400);
     }
     //Encrypt Nin
     const encrypt = await UserService.encryptData(data.nin);
@@ -392,11 +393,11 @@ export class UserService {
     const isBvnValid = kycRecords.find(
       (result) =>
         result.bvn === data.bvn &&
-        result.firstName.toLowerCase() === user.firstName &&
-        result.lastName.toLowerCase() === user.lastName
+        result.firstName.toLowerCase() === user.firstName.toLowerCase() &&
+        result.lastName.toLowerCase() === user.lastName.toLowerCase()
     );
     if (!isBvnValid) {
-      throw throwCustomError("Invalid BVN", 402);
+      throw throwCustomError("Invalid BVN", 400);
     }
 
     // Encrypt Bvn
@@ -410,15 +411,12 @@ export class UserService {
       nin: encrypt,
       bvn: encryptBvn,
       userId,
+      is_kyc_verifed: true,
     });
     if (!validate) {
       throw throwCustomError("Unable to verify KYC", 422);
     }
-    // const encrypt = validate.nin;
-    // console.log("encrypt", encrypt);
-    // const decrypt = await UserService.decryptData(encrypt as any);
-    // console.log("decrypt", decrypt);
-    // console.log("validate nin:", validate.nin);
+
     return `Your ${user.role.toUpperCase()} account has been Verified`;
   }
   //Update password
@@ -535,6 +533,8 @@ export class UserService {
   //===================|| ENCRYPT  & DECRYPT||=========================== //
 
   static encryptData = async (text: string) => {
+    console.log(algorithm, key, iv);
+
     const cipher = crypto.createCipheriv(algorithm, key, iv);
     let encrypted = cipher.update(text, "utf8", "hex");
     encrypted += cipher.final("hex");

@@ -1,21 +1,25 @@
-import mongoose, {Schema} from "mongoose";
+import mongoose, { HydratedDocument, Schema } from "mongoose";
 
- const cartSchema = new Schema({
-  items: [
-    {
-      productId: { type: Schema.Types.ObjectId, ref: "Product", require: true },
-      merchantId: { type: Schema.Types.ObjectId, ref: "Merchant", require: true },
-      productName: { type: String, required: true },
-      unitPrice: { type: Number, required: true },
-      quantity: { type: Number, required: true, min: 1 },
-      //image: { type: String, required: true },
-    },
-  ],
-  couponCode: { type: String, required: false },
-  currency: { type: String, required: true },
-  totalPrice: { type: Number, required: true },
-}, 
-{ timestamps: true }
+const cartSchema = new Schema(
+  {
+    ownerId: { type: Schema.Types.ObjectId, ref: "User", require: true },
+    items: [
+      {
+        productId: {
+          type: Schema.Types.ObjectId,
+          ref: "Product",
+          require: true,
+        },
+        quantity: { type: Number, default: 1 },
+        //image: { type: String, required: true },
+      },
+    ],
+    couponCode: { type: String },
+    totalPrice: { type: Number },
+  },
+  { timestamps: true }
 );
 
 export const cartModel = mongoose.model("Cart", cartSchema);
+
+// type CartDocument = HydratedDocument<typeof cartModel>;

@@ -4,34 +4,63 @@ import { cartValidate } from "../validation/cart.validate";
 import { throwCustomError } from "../midddleware/errorHandler.midleware";
 import { Types } from "mongoose";
 import { productRepository } from "../repository/product.repository";
+import { cartModel } from "../models/cart.model";
 
 export class cartService {
-  static createCart = async (data: Cart) => {
+  static updateCart = async (data: Cart, userId: Types.ObjectId) => {
     const { error } = cartValidate.validate(data);
     if (error) throwCustomError(`Validation error: ${error.message}`, 400);
 
-
+    if (Types.ObjectId.isValid(data.productId))
+      throw throwCustomError("InvaliId", 422);
     //get product by id
-    const product = await productRepository.findById(data.productId as any);
+    const product = await productRepository.findById(
+      new Types.ObjectId(data.productId)
+    );
     if (!product) throw throwCustomError("Product not found", 404);
 
     // Calculate total price
-
-    const response = await cartRepository.cart({ ...data });
-
     const price = product.discountPrice ?? product.price;
 
-    const totalAmount = response.items.reduce(
-      (sum, item) => sum + price * item.quantity,
-      0
-    );
-    return { ...response, totalAmount };
+    const cart = await cartModel.findOne({ ownerId: userId });
+    if (!cart) {
+      //create the cart
+
+      await cartModel.create({
+        ownerId: userId,
+        items: [data],
+        totalPrice: price * data.quantity,
+      });
+    } else {
+      const exists = cart?.items.find(
+        (item) => item.productId?.toString() === data.productId.toString()
+      );
+      if (exists) {
+        const updated = await cartModel.findOneAndUpdate(cart._id, {
+          $push: {
+            items: {
+              ...exists,
+              quantity: data.quantity,
+            },
+          },
+          $inc: {
+            totalPrice: +price * data.quantity,
+          },
+        });
+      }
+      return {
+        success: true,
+        message: "Cart updated",
+        data: cart,
+      };
+    }
   };
 
   // this should be a toggle
   static removeItemFromCart = async (userId: string, productId: string) => {
     const response = await cartRepository.removeItemFromCart(
       new Types.ObjectId(userId),
+
       new Types.ObjectId(productId)
     );
 

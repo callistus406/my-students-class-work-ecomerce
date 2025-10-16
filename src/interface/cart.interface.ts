@@ -12,7 +12,4 @@ export interface CartItem {
 export interface Cart {
   productId: string;
   quantity: number;
-  couponCode?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
 }
