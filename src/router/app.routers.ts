@@ -20,6 +20,7 @@ router.get("/auth/login", AuthController.login);
 router.post(
   "/auth/upgrade-kyc",
   authMiddleware as any,
+  merchantMiddleware as any,
   AuthController.verifyKyc
 );
 

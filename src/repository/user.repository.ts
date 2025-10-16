@@ -28,9 +28,14 @@ export class UserRepository {
   };
 
   static updateUser = async (userId: Types.ObjectId) => {
-    const response = await otpModel.findByIdAndUpdate(userId, {
-      is_verified: true,
-    });
+    const response = await userModel.findByIdAndUpdate(
+      userId,
+      {
+        is_verified: true,
+      },
+      { new: true }
+    );
+    if (!response) return null;
 
     return response;
   };
@@ -165,19 +170,32 @@ export class UserRepository {
     return response;
   };
 
-  static profilePicture = async (path?: string): Promise<any> => {
-    const response = await uploadModel.create({
-      filePath: path,
-    });
-    if (!response) return null;
-    return response;
-  };
-
   static picture = async (upload: IUpload): Promise<any> => {
     const response = await uploadModel.create({
       userId: upload.userId,
       filePath: upload.filePath,
     });
+    if (!response) return null;
+    return response;
+  };
+
+  static existingImage = async (userId: Types.ObjectId) => {
+    const response = await uploadModel.findOne(userId);
+    if (!response) return null;
+    return response;
+  };
+
+  static updateImage = async (
+    userId: Types.ObjectId,
+    filePath: string
+  ): Promise<any> => {
+    const response = await uploadModel.findByIdAndUpdate(
+      userId,
+      { filePath },
+      {
+        new: true,
+      }
+    );
     if (!response) return null;
     return response;
   };
@@ -196,7 +214,6 @@ export class UserRepository {
         dateOfBirth: data.dateOfBirth,
         nin: data.nin,
         bvn: data.bvn,
-        is_verified: true,
       },
       { new: true }
     );
