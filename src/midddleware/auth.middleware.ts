@@ -9,7 +9,7 @@ export interface IRequest extends Request {
     id: Types.ObjectId;
     email: string;
     is_verified?: boolean;
-    userType: string;
+    role: string;
   };
 }
 
@@ -35,7 +35,7 @@ export const authMiddleware = (
       email: user.email as string,
       id: user._id,
       is_verified: user.is_verified,
-      userType: data.userType,
+      role: user.role as string,
     };
     next();
   });
@@ -49,7 +49,7 @@ export const customerMiddleware = (
   const user = req.user;
   if (!user) return res.sendStatus(403);
 
-  if (user.userType !== USER_TYPE.CUSTOMER)
+  if (user.role !== "customer")
     return res
       .status(403)
       .json({ payload: "You are not authorized to access this resource" });
@@ -65,13 +65,11 @@ export const merchantMiddleware = (
   const user = req.user;
   if (!user) return res.sendStatus(403);
 
-  if (user.userType !== USER_TYPE.MERCHANT)
-    return res
-      .status(403)
-      .json({
-        status: false,
-        payload: "You are not authorized to access this resource",
-      });
+  if (user.role !== "merchant")
+    return res.status(403).json({
+      status: false,
+      payload: "You are not authorized to access this resource",
+    });
 
   next();
 };

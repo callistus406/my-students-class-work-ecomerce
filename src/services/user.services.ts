@@ -526,6 +526,9 @@ export class UserService {
         userId: user.id,
         filePath: domain,
       });
+      if (!res) {
+        throw throwCustomError("unable to replace image", 422);
+      }
     }
 
     return {
