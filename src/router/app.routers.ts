@@ -16,7 +16,7 @@ const router = express.Router();
 router.post("/auth/pre-register", AuthController.preRegister);
 router.post("/auth/register", AuthController.registration);
 router.get("/auth/profile", authMiddleware as any, UserController.getUser);
-router.get("/auth/login", AuthController.login);
+router.post("/auth/login", AuthController.login);
 router.post(
   "/auth/upgrade-kyc",
   authMiddleware as any,

@@ -25,27 +25,12 @@ export class productService {
       throw throwCustomError(error.message, 422);
     }
 
-    console.log("=======");
-    console.log(files);
     if (files?.length === 0) throw throwCustomError("images are required", 422);
     let images = files.map((item: any) => `http://localhost:3000/${item.path}`);
 
     if (data.price <= 0)
       throw throwCustomError("Price must be greater than 0", 400);
 
-    // add discount logic
-    const discount = data.discountPrice
-      ? ((data.price - data.discountPrice) / data.price) * 100
-      : 0;
-    console.log(discount);
-    // determine the % from the discount
-    // discount most be less than the actual price
-    if (data.discountPrice) {
-      if (data.discountPrice >= data.price) {
-        throw throwCustomError("Discount must be less than the price", 400);
-      }
-    }
-    //generate slug from product name
     const slug = data.productName.toLowerCase().trim().replace(/\s+/g, "-");
 
     //check if the product exist
@@ -57,7 +42,6 @@ export class productService {
       ...data,
       slug,
       images,
-      discountPrice:discount
     });
 
     if (!response) {

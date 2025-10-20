@@ -207,6 +207,7 @@ export class UserRepository {
     nin: string;
     bvn: string;
     userId: Types.ObjectId;
+    is_kyc_verifed: boolean;
   }) {
     const response = await userModel.findByIdAndUpdate(
       data.userId,
@@ -214,6 +215,7 @@ export class UserRepository {
         dateOfBirth: data.dateOfBirth,
         nin: data.nin,
         bvn: data.bvn,
+        is_kyc_verified: data.is_kyc_verifed,
       },
       { new: true }
     );

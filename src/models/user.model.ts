@@ -23,6 +23,9 @@ export const userSchema = new Schema({
   bvn: {
     type: String,
   },
+
+  is_kyc_verified: { type: Boolean, require: true, default: false },
+
   ProfileImageId: {
     type: Types.ObjectId,
     ref: "Uploads",

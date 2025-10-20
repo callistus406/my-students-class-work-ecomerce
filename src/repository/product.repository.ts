@@ -4,10 +4,11 @@ import { productModel } from "../models/product.model";
 import { Types } from "mongoose";
 import { reviewModel } from "../models/review.model";
 import { Cart, CartItem } from "../interface/cart.interface";
+import { cartModel } from "../models/cart.model";
 
 export class productRepository {
-  static findById = async (data: CartItem) => {
-    const res = productModel.findById(data).lean();
+  static findById = async (id: Types.ObjectId) => {
+    const res = productModel.findById(id).lean();
     if (!res) return null;
     return res;
   };
