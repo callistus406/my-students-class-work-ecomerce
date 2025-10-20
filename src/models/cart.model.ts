@@ -11,6 +11,7 @@ const cartSchema = new Schema(
           require: true,
         },
         quantity: { type: Number, default: 1 },
+        unitPrice: { type: Number, require: true },
         //image: { type: String, required: true },
       },
     ],

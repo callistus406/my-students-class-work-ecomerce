@@ -19,6 +19,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@paystack/inline-js": "^2.22.7",
     "axios": "^1.12.2",
     "bcrypt": "^6.0.0",
     "dotenv": "^16.6.1",
