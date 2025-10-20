@@ -74,6 +74,6 @@ router.post(
   customerMiddleware as any,
   InventoryController.ratings
 );
-router.post("/cart/create", MarketplaceController.createCart as any);
+router.post("/cart/create", MarketplaceController.updateCart as any);
 
 export default router;
