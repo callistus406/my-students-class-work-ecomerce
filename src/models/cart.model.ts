@@ -3,20 +3,9 @@ import mongoose, { HydratedDocument, Schema } from "mongoose";
 const cartSchema = new Schema(
   {
     ownerId: { type: Schema.Types.ObjectId, ref: "User", require: true },
-    items: [
-      {
-        productId: {
-          type: Schema.Types.ObjectId,
-          ref: "Product",
-          require: true,
-        },
-        quantity: { type: Number, default: 1 },
-        unitPrice: { type: Number, require: true },
-        //image: { type: String, required: true },
-      },
-    ],
+    items: [],
     couponCode: { type: String },
-    totalPrice: { type: Number },
+    totalPrice: { type: Number, require: true },
   },
   { timestamps: true }
 );

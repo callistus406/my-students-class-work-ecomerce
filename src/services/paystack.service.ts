@@ -4,18 +4,19 @@ import { PaymentRepository } from "../repository/paystack.repo";
 import { Paystack } from "../utils/paystack";
 
 export class PaystackService {
-  static async initiatePayment(amount: number, email: string) {
+  static async initiatePayment(amount: number, email: string, orderId: string) {
     try {
       const paymentData = {
         amount,
         email,
       };
-
-      //   const payment = await PaymentRepository.CreatePayment(paymentData);
       const paystackResponse = await Paystack.initializeTransaction({
-        amount: paymentData.amount * 100,
+        amount: paymentData.amount * 100, // to kobo
         email: paymentData.email,
-        callback_url: "http://localhost:8080/api/v1/paystack/callback",
+        callback_url: "http://localhost:3000/api/v1/paystack/callback",
+        metadata: {
+          orderId,
+        },
       });
       return paystackResponse;
     } catch (error: any) {

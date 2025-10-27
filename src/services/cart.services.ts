@@ -5,14 +5,18 @@ import { throwCustomError } from "../midddleware/errorHandler.midleware";
 import { Types } from "mongoose";
 import { productRepository } from "../repository/product.repository";
 import { cartModel } from "../models/cart.model";
+import { userModel } from "../models/user.model";
+import { PaystackService } from "./paystack.service";
+import { orderModel } from "../models/order.model";
 
 export class cartService {
+  //
   static updateCart = async (data: Cart, userId: Types.ObjectId) => {
     const { error } = cartValidate.validate(data);
     if (error) throwCustomError(`Validation error: ${error.message}`, 400);
 
-    if (Types.ObjectId.isValid(data.productId))
-      throw throwCustomError("InvaliId", 422);
+    if (!Types.ObjectId.isValid(data.productId))
+      throw throwCustomError("InvaliId Product ID", 422);
     //get product by id
     const product = await productRepository.findById(
       new Types.ObjectId(data.productId)
@@ -22,32 +26,53 @@ export class cartService {
     // Calculate total price
     const price = product.discountPrice ?? product.price;
 
+    //check if product is avauilable
+    // check if product is in stock
+    //
     const cart = await cartModel.findOne({ ownerId: userId });
     if (!cart) {
       //create the cart
 
-      await cartModel.create({
+      const res = await cartModel.create({
         ownerId: userId,
-        items: [data],
+        items: [
+          {
+            productId: data.productId,
+            quantity: data.quantity,
+            price: price,
+          },
+        ],
         totalPrice: price * data.quantity,
       });
+      return {
+        success: true,
+        message: "Cart updated",
+        data: res,
+      };
     } else {
-      const exists = cart?.items.find(
+      const idx = cart?.items.findIndex(
         (item) => item.productId?.toString() === data.productId.toString()
       );
-      if (exists) {
-        const updated = await cartModel.findOneAndUpdate(cart._id, {
-          $push: {
-            items: {
-              ...exists,
-              quantity: data.quantity,
-            },
-          },
-          $inc: {
-            totalPrice: +price * data.quantity,
-          },
+
+      if (idx > -1) {
+        cart.items[idx].quantity = data.quantity;
+      } else {
+        cart.items.push({
+          productId: data.productId,
+          quantity: data.quantity,
+          price: price,
         });
       }
+
+      const sum = cart.items.reduce(
+        (acc, item) => acc + item.price * item.quantity,
+        0
+      );
+
+      cart.totalPrice = sum;
+
+      await cart.save();
+
       return {
         success: true,
         message: "Cart updated",
@@ -56,18 +81,63 @@ export class cartService {
     }
   };
 
-  // this should be a toggle
-  static removeItemFromCart = async (userId: string, productId: string) => {
-    const response = await cartRepository.removeItemFromCart(
-      new Types.ObjectId(userId),
+  //order
 
-      new Types.ObjectId(productId)
-    );
-
-    if (!response) {
-      return { success: false, message: "Cart not found or item not in cart" };
+  static createOrder = async (
+    cartId: Types.ObjectId,
+    userId: Types.ObjectId,
+    shippingAddress: {
+      street: string;
+      city: string;
+      state: string;
     }
+  ) => {
+    console.log("oooooooooooo");
 
-    return { success: true, message: "Item removed from cart", cart: response };
+    try {
+      const user = await userModel.findById(userId);
+      if (!user) throw throwCustomError("User not found", 404);
+      console.log({
+        userId,
+        cartId,
+      });
+      const cart = await cartModel.findById(cartId);
+      if (!cart) throw throwCustomError("Cart not found", 404);
+
+      const order = await orderModel.create({
+        userId,
+        cartId,
+        subTotal: cart.totalPrice,
+        paymentMethod: "paystack",
+        status: "draft",
+        currency: "NGN",
+        totalPrice: cart.totalPrice,
+      });
+
+      console.log(order);
+
+      //clear cart
+
+      cart.items = [];
+      cart.totalPrice = 0;
+
+      await cart.save();
+
+      // initiate payment
+
+      if (!order) throw throwCustomError("Unable to create order", 500);
+      const payment = await PaystackService.initiatePayment(
+        order.totalPrice as number,
+        user.email as string,
+        order._id.toString()
+      );
+
+      return {
+        order: order,
+        payment,
+      };
+    } catch (error) {
+      console.log(error);
+    }
   };
 }

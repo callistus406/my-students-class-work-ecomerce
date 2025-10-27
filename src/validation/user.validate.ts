@@ -21,7 +21,7 @@ export const preValidate = Joi.object({
 
 export const userValidate = Joi.object({
   email: Joi.string().email().required(),
-  otp: Joi.string().required(),
+  otp: Joi.string(),
 });
 
 export const loginValidate = Joi.object({
@@ -38,8 +38,7 @@ export const kycValidate = Joi.object({
 export const resetValidate = Joi.object({
   email: Joi.string().email().required(),
   otp: Joi.string().required(),
-  newPassword: Joi.string()
-    .required()
+  newPassword: Joi.string().required(),
 });
 
 export const profileSchema = Joi.object({

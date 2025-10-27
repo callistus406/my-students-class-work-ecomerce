@@ -15,11 +15,28 @@ export class MarketplaceController {
     }
   };
 
-  //convert this to toggle
-  static removeItemFromCart = async (req: Request, res: Response) => {
+  // //convert this to toggle
+  // static removeItemFromCart = async (req: Request, res: Response) => {
+  //   try {
+  //     const { userId, productId } = req.params;
+  //     const cart = await cartService.removeItemFromCart(userId, productId);
+  //     res.status(200).json(cart);
+  //   } catch (error: any) {
+  //     res.status(400).json({ error: error.message });
+  //   }
+  // };
+
+  static createOrder = async (req: IRequest, res: Response) => {
     try {
-      const { userId, productId } = req.params;
-      const cart = await cartService.removeItemFromCart(userId, productId);
+      const { cartId, street, city, state } = req.body;
+      const userId = req.user.id;
+      console.log(userId);
+
+      const cart = await cartService.createOrder(cartId, userId, {
+        street,
+        city,
+        state,
+      });
       res.status(200).json(cart);
     } catch (error: any) {
       res.status(400).json({ error: error.message });

@@ -1,20 +1,14 @@
 import axios from "axios";
-import {API_KEY} from "../config/system.variable";
+import { API_KEY } from "../config/system.variable";
 
 export interface IInitializeTransaction {
   email: string;
   amount: number;
-  callback_url?: string;
-}
-
-export interface IVerifyPayment {
-  email: string;
-  amount: number;
-  reference?: any;
+  callback_url: string;
+  metadata: object;
 }
 
 const API_URL = "https://api.paystack.co";
-// const API_KEY = process.env.TEST_KEY;
 
 export class Paystack {
   static async initializeTransaction(data: IInitializeTransaction) {

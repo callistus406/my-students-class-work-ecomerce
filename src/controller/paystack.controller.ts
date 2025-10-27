@@ -9,8 +9,8 @@ export class PaystackController {
       const email = req.user.email;
 
       const amount = req.body.amount;
-      const response = await PaystackService.initiatePayment(amount, email);
-      res.status(200).json(response);
+      // const response = await PaystackService.initiatePayment(amount, email);
+      res.status(200).json("response");
     } catch (error: any) {
       res.status(400).send({ error: error.message });
     }

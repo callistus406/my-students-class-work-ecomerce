@@ -12,6 +12,7 @@ export const algorithm = process.env.ALGORITHM as string;
 
 const keyBase64 = process.env.KEY_BASE64;
 const ivBase64 = process.env.IV_BASE64;
+export const API_KEY = process.env.API_KEY;
 
 if (!keyBase64 || !ivBase64) {
   throw throwCustomError("KEY_BASE64 or IV_BASE64 is missing in env", 422);

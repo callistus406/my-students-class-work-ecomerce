@@ -6,6 +6,8 @@ import { IRequest } from "../midddleware/auth.middleware";
 
 export class AuthController {
   static preRegister = async (req: Request, res: Response) => {
+    console.log("wertyuiuytre");
+
     try {
       const user = req.body;
       const response = await UserService.preRegister(user);

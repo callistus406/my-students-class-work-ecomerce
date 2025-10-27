@@ -13,7 +13,7 @@ export const userSchema = new Schema({
     type: String,
     enum: ["customer", "merchant"],
   },
-  otp: { type: String, require: true },
+  otp: { type: String },
   dateOfBirth: {
     type: String,
   },

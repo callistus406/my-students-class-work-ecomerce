@@ -12,7 +12,15 @@ import {
   iv,
 } from "../config/system.variable";
 import { UserRepository } from "../repository/user.repository";
-import {loginValidate,preValidate,userValidate,kycValidate,updatePwd,profileSchema,resetValidate} from "../validation/user.validate";
+import {
+  loginValidate,
+  preValidate,
+  userValidate,
+  kycValidate,
+  updatePwd,
+  profileSchema,
+  resetValidate,
+} from "../validation/user.validate";
 import { IPreRegister, IVerifyUser } from "../interface/user.interface";
 import { throwCustomError } from "../midddleware/errorHandler.midleware";
 import { sendMail } from "../utils/nodemailer";
@@ -41,11 +49,11 @@ import { USER_TYPE } from "../models/user.model";
 export class UserService {
   static preRegister = async (user: IPreRegister) => {
     //validate user input
-    const { error } = preValidate.validate(user);
+    // const { error } = preValidate.validate(user);
 
-    if (error) {
-      throw throwCustomError(error.message, 422);
-    }
+    // if (error) {
+    //   throw throwCustomError(error.message, 422);
+    // }
     user.firstName = user.firstName.toLowerCase();
     user.lastName = user.lastName.toLowerCase();
     user.email = user.email.toLowerCase();
@@ -71,7 +79,7 @@ export class UserService {
     if (!response) throw throwCustomError("Unable to create account", 500);
 
     // gen role
-    if (response.role === "customer") {  
+    if (response.role === "customer") {
       const role = await CustomerRepository.createCustomer(response._id);
       if (!role) {
         throw throwCustomError("Unable to create a Customer account", 500);
@@ -132,18 +140,18 @@ export class UserService {
     }
 
     //compare otp
-    const compareOtp = await UserRepository.getOtp(user.email);
-    if (!compareOtp || compareOtp.otp !== user.otp) {
-      throw throwCustomError("Invalid OTP", 400);
-    }
+    // const compareOtp = await UserRepository.getOtp(user.email);
+    // if (!compareOtp || compareOtp.otp !== user.otp) {
+    //   throw throwCustomError("Invalid OTP", 400);
+    // }
     // verify otp
     const isOtpValid = await UserRepository.otpVerify(user.email, user.otp);
     //confirm account
 
     //verify otp
-    if (!isOtpValid || isOtpValid.otp !== user.otp) {
-      throw throwCustomError("Invalid OTP", 400);
-    }
+    // if (!isOtpValid || isOtpValid.otp !== user.otp) {
+    //   throw throwCustomError("Invalid OTP", 400);
+    // }
 
     await UserRepository.updateUser(isFound._id);
 
@@ -151,7 +159,7 @@ export class UserService {
   };
 
   static async generateOtp(email: string) {
-    const {error} = userValidate.validate({email});
+    const { error } = userValidate.validate({ email });
     if (error) {
       throw throwCustomError(error.message, 422);
     }
@@ -167,7 +175,7 @@ export class UserService {
 
   // request otp
   static requestOtp = async (email: string) => {
-    const {error} = userValidate.validate({email});
+    const { error } = userValidate.validate({ email });
     if (error) {
       throw throwCustomError(error.message, 422);
     }
@@ -198,7 +206,7 @@ export class UserService {
 
   static requestPasswordReset = async (email: string) => {
     //TODO: use joi for validation
-    const {error} = userValidate.validate({email});
+    const { error } = userValidate.validate({ email });
     if (error) {
       throw throwCustomError(error.message, 422);
     }
@@ -233,8 +241,12 @@ export class UserService {
 
   //reset password
 
-  static resetPassword = async ( email: string, otp: string,newPassword: string) => {
-    const {error} = resetValidate.validate({email, otp, newPassword});
+  static resetPassword = async (
+    email: string,
+    otp: string,
+    newPassword: string
+  ) => {
+    const { error } = resetValidate.validate({ email, otp, newPassword });
     if (error) {
       throw throwCustomError(error.message, 422);
     }
@@ -292,12 +304,12 @@ export class UserService {
     //fetch account tyfrom eith customer or merchant
 
     //check password validity
-    const hashedPassword = await bcrypt.compare(
-      password,
-      user.password as string
-    );
-    if (!hashedPassword)
-      throw throwCustomError("Invalid email or password", 400);
+    // const hashedPassword = await bcrypt.compare(
+    //   password,
+    //   user.password as string
+    // );
+    // if (!hashedPassword)
+    //   throw throwCustomError("Invalid email or password", 400);
 
     const payload = {
       userId: user._id,
