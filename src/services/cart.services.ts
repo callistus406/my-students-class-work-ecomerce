@@ -26,13 +26,13 @@ export class cartService {
     // Calculate total price
     const price = product.discountPrice ?? product.price;
 
-    //check if product is avauilable
     // check if product is in stock
-    //
+    const stock =  await productRepository.findByQuantity(data.quantity as any);
+    if(!stock || stock.length === 0) throw throwCustomError("Product out of stock", 400);
+    //get user cart
     const cart = await cartModel.findOne({ ownerId: userId });
     if (!cart) {
       //create the cart
-
       const res = await cartModel.create({
         ownerId: userId,
         items: [
