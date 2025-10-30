@@ -87,4 +87,6 @@ router.post(
   customerMiddleware as any,
   MarketplaceController.createOrder as any
 );
+
+router.post("/webhook", PaystackController.webhook as any);
 export default router;

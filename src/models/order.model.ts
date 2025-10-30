@@ -6,6 +6,7 @@ export const orderSchema = new Schema({
   cartId: { type: Schema.Types.ObjectId, ref: "Cart", require: true },
   subTotal: { type: Number, require: true }, //total unit price
   discount: { type: Number, require: false },
+  orderId: { type: String, require: true },
   shippingFee: { type: Number },
   totalAmount: { type: Number, require: true },
   couponCode: { type: String, require: false },

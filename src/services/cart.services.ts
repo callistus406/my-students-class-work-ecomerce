@@ -38,6 +38,7 @@ export class cartService {
         items: [
           {
             productId: data.productId,
+            productName: product.productName,
             quantity: data.quantity,
             price: price,
           },
@@ -92,21 +93,17 @@ export class cartService {
       state: string;
     }
   ) => {
-    console.log("oooooooooooo");
-
     try {
       const user = await userModel.findById(userId);
       if (!user) throw throwCustomError("User not found", 404);
-      console.log({
-        userId,
-        cartId,
-      });
       const cart = await cartModel.findById(cartId);
       if (!cart) throw throwCustomError("Cart not found", 404);
 
+      const orderId = `ORD-${Date.now()}`;
       const order = await orderModel.create({
         userId,
         cartId,
+        orderId,
         subTotal: cart.totalPrice,
         paymentMethod: "paystack",
         status: "draft",
@@ -118,8 +115,8 @@ export class cartService {
 
       //clear cart
 
-      cart.items = [];
-      cart.totalPrice = 0;
+      // cart.items = [];
+      // cart.totalPrice = 0;
 
       await cart.save();
 

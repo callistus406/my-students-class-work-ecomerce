@@ -41,4 +41,13 @@ export class PaystackController {
       res.status(400).send({ error: error.message });
     }
   }
+
+  static async webhook(req: Request, res: Response) {
+    try {
+      const response = await PaystackService.webhook(req.body);
+      return res.status(200).json(response);
+    } catch (error: any) {
+      res.status(400).send({ error: error.message });
+    }
+  }
 }
