@@ -6,10 +6,9 @@ import { UserRepository } from "../repository/user.repository";
 export class PaystackController {
   static async initiatePayment(req: IRequest, res: Response) {
     try {
-      const email = req.user.email;
-
+      const email = req.body.email;
       const amount = req.body.amount;
-      // const response = await PaystackService.initiatePayment(amount, email);
+      //const response = await PaystackService.initiatePayment(amount, email);
       res.status(200).json("response");
     } catch (error: any) {
       res.status(400).send({ error: error.message });
