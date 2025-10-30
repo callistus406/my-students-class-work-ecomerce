@@ -12,6 +12,11 @@ export class productRepository {
     if (!res) return null;
     return res;
   };
+  static findByQuantity = async (quantity: number) => {
+    const res = await productModel.find({ quantity: { $gte: quantity } }).lean();
+    if (!res) return null;
+    return res;
+  };
 
   // product creations
   static createProduct = async (data: IProduct) => {
