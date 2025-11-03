@@ -21,6 +21,8 @@ export const handleCustomError = (
   res: Response,
   _next: NextFunction
 ) => {
+  console.log("oooooooppspsp");
+
   if (error instanceof CustomError) {
     res.status(error.statusCode).json({
       success: false,

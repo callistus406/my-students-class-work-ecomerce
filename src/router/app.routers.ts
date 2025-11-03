@@ -56,7 +56,7 @@ router.post(
 router.post(
   "/inventory/products",
   authMiddleware as any,
-  merchantMiddleware as any,
+  // merchantMiddleware as any,
   upload.any() as any,
   InventoryController.createProduct
 );
@@ -65,26 +65,32 @@ router.get("/inventory/products/:id", InventoryController.findById);
 router.delete(
   "/inventory/products/:id",
   authMiddleware as any,
-  merchantMiddleware as any,
+  // merchantMiddleware as any,
   InventoryController.deleteProduct
 );
 router.post(
   "/inventory/product/rating",
   authMiddleware as any,
-  customerMiddleware as any,
+  // customerMiddleware as any,
   InventoryController.ratings
 );
 router.post(
-  "/cart",
+  "/carts",
   authMiddleware as any,
-  customerMiddleware as any,
+  // customerMiddleware as any,
   MarketplaceController.updateCart as any
+);
+router.get(
+  "/carts",
+  authMiddleware as any,
+  // customerMiddleware as any,
+  MarketplaceController.getCart as any
 );
 
 router.post(
-  "/order",
+  "/orders",
   authMiddleware as any,
-  customerMiddleware as any,
+  // customerMiddleware as any,
   MarketplaceController.createOrder as any
 );
 

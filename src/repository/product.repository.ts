@@ -12,8 +12,8 @@ export class productRepository {
     if (!res) return null;
     return res;
   };
-  static findByQuantity = async (quantity: number) => {
-    const res = await productModel.find({ quantity: { $gte: quantity } }).lean();
+  static findByQuantity = async (productId: Types.ObjectId) => {
+    const res = await productModel.findById(productId);
     if (!res) return null;
     return res;
   };

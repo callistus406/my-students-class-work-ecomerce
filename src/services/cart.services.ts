@@ -26,9 +26,9 @@ export class cartService {
     // Calculate total price
     const price = product.discountPrice ?? product.price;
 
-    // check if product is in stock
-    const stock =  await productRepository.findByQuantity(data.quantity as any);
-    if(!stock || stock.length === 0) throw throwCustomError("Product out of stock", 400);
+    if (data.quantity > product.quantity)
+      throw throwCustomError("Out of stock", 400);
+
     //get user cart
     const cart = await cartModel.findOne({ ownerId: userId });
     if (!cart) {
@@ -82,6 +82,20 @@ export class cartService {
     }
   };
 
+  static async getcart(userId: Types.ObjectId) {
+    const cart = await cartModel.findOne({
+      ownerId: userId,
+    });
+
+    if (!cart) throw throwCustomError("Cart not found", 404);
+
+    return {
+      success: true,
+      message: "Cart retrived successfully",
+      data: cart,
+    };
+  }
+
   //order
 
   static createOrder = async (
@@ -98,7 +112,6 @@ export class cartService {
       if (!user) throw throwCustomError("User not found", 404);
       const cart = await cartModel.findById(cartId);
       if (!cart) throw throwCustomError("Cart not found", 404);
-
       const orderId = `ORD-${Date.now()}`;
       const order = await orderModel.create({
         userId,
@@ -111,18 +124,9 @@ export class cartService {
         totalPrice: cart.totalPrice,
       });
 
-      console.log(order);
-
-      //clear cart
-
-      // cart.items = [];
-      // cart.totalPrice = 0;
-
-      await cart.save();
-
+      if (!order) throw throwCustomError("Unable to create order", 500);
       // initiate payment
 
-      if (!order) throw throwCustomError("Unable to create order", 500);
       const payment = await PaystackService.initiatePayment(
         order.totalPrice as number,
         user.email as string,
@@ -130,11 +134,13 @@ export class cartService {
       );
 
       return {
+        success: true,
+        message: "Payment link",
         order: order,
         payment,
       };
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      throw error;
     }
   };
 }
