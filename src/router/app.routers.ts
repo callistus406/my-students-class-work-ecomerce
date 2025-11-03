@@ -96,3 +96,9 @@ router.post(
 
 router.post("/webhook", PaystackController.webhook as any);
 export default router;
+
+// get orders
+// udpate order
+// get rating
+// update product
+// delete product
