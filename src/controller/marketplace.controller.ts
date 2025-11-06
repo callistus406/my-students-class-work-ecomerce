@@ -37,11 +37,11 @@ export class MarketplaceController {
   static updateOrder = asyncWrapper(async (req: Request, res: Response) => {
     try {
       const orderId = req.params.orderId;
-      const updateData = req.body;
+      const {productId, quantity} = req.body;
       console.log("Order ID:", orderId);
-      console.log("Update Data:", updateData);
+      //console.log("Update Data:", updateData);
 
-      const updatedOrder = await cartService.updateOrder(orderId as any, updateData);
+      const updatedOrder = await cartService.updateOrder(orderId as any, productId, quantity);
        if (!updatedOrder) {
         return res.status(404).json({ message: "Order not found" });
       }

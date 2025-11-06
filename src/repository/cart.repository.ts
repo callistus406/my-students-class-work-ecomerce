@@ -82,11 +82,11 @@ export class cartRepository {
   }
 
   //update order
-  static async updateOrder(cartId: Types.ObjectId, updateData: any) {
+  static async updateOrder(cartId: Types.ObjectId, productId: Types.ObjectId,quantity: string ) {
     const order = await cartModel.findOneAndUpdate(
       { _id: cartId },
-      { $set: updateData },
-      { new: true }
+      { $set: { "items.$[elem].quantity": quantity } },
+      { new: true, arrayFilters: [{ "elem.productId": productId }] }
     );
     return order;
   }
