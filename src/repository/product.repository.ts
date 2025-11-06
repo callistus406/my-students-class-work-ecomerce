@@ -5,7 +5,7 @@ import { Types } from "mongoose";
 import { reviewModel } from "../models/review.model";
 import { Cart, CartItem } from "../interface/cart.interface";
 import { cartModel } from "../models/cart.model";
-
+// this is a new commit
 export class productRepository {
   static findById = async (id: Types.ObjectId) => {
     const res = productModel.findById(id).lean();
@@ -98,14 +98,12 @@ export class productRepository {
     return response;
   }
 
-// delete product
+  // delete product
   static async deleteProduct(productId: Types.ObjectId) {
-    if(!productId) {
+    if (!productId) {
       return null;
     }
     const product = await productModel.findOneAndDelete({ _id: productId });
     return product;
   }
-
-
 }
