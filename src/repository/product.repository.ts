@@ -97,4 +97,15 @@ export class productRepository {
     if (!response) return null;
     return response;
   }
+
+// delete product
+  static async deleteProduct(productId: Types.ObjectId) {
+    if(!productId) {
+      return null;
+    }
+    const product = await productModel.findOneAndDelete({ _id: productId });
+    return product;
+  }
+
+
 }

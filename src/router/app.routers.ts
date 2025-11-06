@@ -60,16 +60,21 @@ router.post(
   upload.any() as any,
   InventoryController.createProduct
 );
-router.get("/inventory/products", InventoryController.getProducts);
+router.get("/inventory/products", InventoryController.getProducts);  
+//get product by id
 router.get("/inventory/products/:id", InventoryController.findById);
+
+//delete product
 router.delete(
   "/inventory/products/:id",
   authMiddleware as any,
   // merchantMiddleware as any,
   InventoryController.deleteProduct
 );
+
+// rate product
 router.post(
-  "/inventory/product/rating",
+  "/inventory/product/rating/:productId",
   authMiddleware as any,
   // customerMiddleware as any,
   InventoryController.ratings
@@ -93,12 +98,18 @@ router.post(
   // customerMiddleware as any,
   MarketplaceController.createOrder as any
 );
+router.patch(
+  "/orders/:orderId",
+  authMiddleware as any,
+  // customerMiddleware as any,
+  MarketplaceController.updateOrder as any
+);
 
 router.post("/webhook", PaystackController.webhook as any);
 export default router;
 
-// get orders
+//  
 // udpate order
-// get rating
+// get rating done
 // update product
-// delete product
+// delete product done
