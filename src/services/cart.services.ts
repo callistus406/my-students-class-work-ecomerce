@@ -145,22 +145,17 @@ export class cartService {
   };
 
   // update order
-  static async updateOrder(cartId: Types.ObjectId, productId: Types.ObjectId,quantity: string) {
-     if (!cartId) {
+  static async updateOrder(
+    cartId: Types.ObjectId,
+    productId: Types.ObjectId,
+    quantity: string
+  ) {
+    if (!cartId) {
       throw new Error("Cart ID is required");
     }
 
-    const cart = await cartRepository.updateOrder(
-      cartId,
-      productId,
-      quantity
-    );
+    const cart = await cartRepository.updateOrder(cartId, productId, quantity);
     await cart?.save();
     return cart;
   }
-
-
-  
-
-
 }
