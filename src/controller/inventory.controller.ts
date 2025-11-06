@@ -6,9 +6,13 @@ import { IRequest } from "../midddleware/auth.middleware";
 
 export class InventoryController {
   // product creation controller
-  static createProduct = asyncWrapper(async (req: Request, res: Response) => {
+  static createProduct = asyncWrapper(async (req: IRequest, res: Response) => {
     const data = req.body;
-    const response = await productService.createProduct(data, req.files);
+    const response = await productService.createProduct(
+      data,
+      req.user.id,
+      req.files
+    );
     res.status(200).json({ success: true, payload: response });
   });
 

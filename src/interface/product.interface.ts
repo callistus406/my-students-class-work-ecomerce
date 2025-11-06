@@ -9,6 +9,7 @@ export interface IProduct {
   quantity: number;
   isActive?: boolean;
   images: string[];
+  merchantId?: Types.ObjectId;
 }
 
 export interface IRequest extends Request {

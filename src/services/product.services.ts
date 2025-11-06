@@ -9,7 +9,6 @@ import {
 } from "../validation/product.validate";
 import { reviewModel } from "../models/review.model";
 export class productService {
-
   static findById = async (id: Types.ObjectId) => {
     if (!id) {
       throw throwCustomError("id is required", 422);
@@ -19,7 +18,11 @@ export class productService {
   };
   // product creation service
 
-  static createProduct = async (data: IProduct, files: any) => {
+  static createProduct = async (
+    data: IProduct,
+    merchantId: Types.ObjectId,
+    files: any
+  ) => {
     const { error } = productValidate.validate(data);
     if (error) {
       throw throwCustomError(error.message, 422);
@@ -40,6 +43,7 @@ export class productService {
 
     const response = await productRepository.createProduct({
       ...data,
+      merchantId,
       slug,
       images,
     });
@@ -63,10 +67,10 @@ export class productService {
 
     if (isNaN(page) || page < 1) page = 1;
     if (isNaN(limit) || limit < 1) limit = 10;
-    if (limit > 100) limit = 100; 
+    if (limit > 100) limit = 100;
 
     return productRepository.getProducts(page, limit, search);
-  }
+  };
 
   // update product service
   static updateProduct = async (id: string) => {
