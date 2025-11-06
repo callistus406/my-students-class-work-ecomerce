@@ -32,4 +32,26 @@ export class MarketplaceController {
     const cart = await cartService.getcart(userId);
     res.status(200).json(cart);
   });
+
+  // update order
+  static updateOrder = asyncWrapper(async (req: Request, res: Response) => {
+    try {
+      const orderId = req.params.orderId;
+      const updateData = req.body;
+      console.log("Order ID:", orderId);
+      console.log("Update Data:", updateData);
+
+      const updatedOrder = await cartService.updateOrder(orderId as any, updateData);
+       if (!updatedOrder) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      console.log("Updated Order:", updatedOrder);
+      res.status(200).json({
+        message: "Order updated successfully",
+        data: updatedOrder,
+      });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
 }

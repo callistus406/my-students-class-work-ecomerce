@@ -143,4 +143,26 @@ export class cartService {
       throw error;
     }
   };
+
+  // update order
+  static async updateOrder(cartId: Types.ObjectId, updateData: any) {
+     if (!cartId) {
+      throw new Error("Cart ID is required");
+    }
+     if (!updateData || typeof updateData !== "object") {
+      throw new Error("Update data must be an object");
+    }
+
+    const cart = await cartRepository.updateOrder(
+      cartId,
+      updateData
+    );
+    await cart?.save();
+    return cart;
+  }
+
+
+  
+
+
 }

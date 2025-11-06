@@ -1,6 +1,7 @@
 import { cartModel } from "../models/cart.model";
 import { Cart, CartItem } from "../interface/cart.interface";
 import { Types } from "mongoose";
+import { orderModel } from "../models/order.model";
 
 export class cartRepository {
   static cart = async (data: Cart) => {
@@ -69,6 +70,25 @@ export class cartRepository {
     });
     return cart;
   }
- 
 
-}
+  // clear cart
+  static async clearCart(userId: Types.ObjectId) {
+    const cart = await cartModel.findOneAndUpdate(
+      { userId },
+      { $set: { items: [], totalPrice: 0 } },
+      { new: true }
+    );
+    return cart;
+  }
+
+  //update order
+  static async updateOrder(cartId: Types.ObjectId, updateData: any) {
+    const order = await cartModel.findOneAndUpdate(
+      { _id: cartId },
+      { $set: updateData },
+      { new: true }
+    );
+    return order;
+  }
+
+} 
